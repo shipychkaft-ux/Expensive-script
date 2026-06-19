@@ -5022,3 +5022,273 @@ task.spawn(function()
     repeat task.wait() until GuiLibrary.ConfigLoaded
     GuiLibrary:CreateNotification("Universal", "Loaded successfully! Press "..GuiLibrary.GuiKeybind.." to open GUI.", 5, "Info", true)
 end)
+-- ============================================
+-- ДОБАВИТЬ В КОНЕЦ Universal.lua
+-- ============================================
+
+-- Функции для управления всеми модулями
+Universal.StartKillAura = function()
+    -- Логика KillAura из Universal
+end
+
+Universal.StopKillAura = function()
+    -- Остановка KillAura
+end
+
+Universal.StartSpeed = function()
+    -- Логика Speed
+end
+
+Universal.StopSpeed = function()
+    -- Остановка Speed
+end
+
+Universal.StartInfinityJump = function()
+    -- Логика InfinityJump
+    _G.infinjump = true
+end
+
+Universal.StopInfinityJump = function()
+    -- Остановка InfinityJump
+    _G.infinjump = false
+end
+
+Universal.StartFly = function()
+    -- Логика Fly
+end
+
+Universal.StopFly = function()
+    -- Остановка Fly
+end
+
+Universal.StartPhase = function()
+    -- Логика Phase
+end
+
+Universal.StopPhase = function()
+    -- Остановка Phase
+end
+
+Universal.StartSpinBot = function()
+    -- Логика SpinBot
+end
+
+Universal.StopSpinBot = function()
+    -- Остановка SpinBot
+end
+
+Universal.StartFullbright = function()
+    -- Логика Fullbright
+end
+
+Universal.StopFullbright = function()
+    -- Остановка Fullbright
+end
+
+Universal.StartFOVChanger = function()
+    -- Логика FOV Changer
+end
+
+Universal.StopFOVChanger = function()
+    -- Остановка FOV Changer
+end
+
+Universal.StartNameTags = function()
+    -- Логика NameTags
+end
+
+Universal.StopNameTags = function()
+    -- Остановка NameTags
+end
+
+Universal.StartBreadcrumbs = function()
+    -- Логика Breadcrumbs
+end
+
+Universal.StopBreadcrumbs = function()
+    -- Остановка Breadcrumbs
+end
+
+Universal.StartChinaHat = function()
+    -- Логика ChinaHat
+end
+
+Universal.StopChinaHat = function()
+    -- Остановка ChinaHat
+end
+
+Universal.StartCrossHair = function()
+    -- Логика CrossHair
+end
+
+Universal.StopCrossHair = function()
+    -- Остановка CrossHair
+end
+
+Universal.StartRainbowSkin = function()
+    -- Логика RainbowSkin
+end
+
+Universal.StopRainbowSkin = function()
+    -- Остановка RainbowSkin
+end
+
+Universal.StartSnowing = function()
+    -- Логика Snowing
+end
+
+Universal.StopSnowing = function()
+    -- Остановка Snowing
+end
+
+Universal.StartSoundPlayer = function()
+    -- Логика SoundPlayer
+end
+
+Universal.StopSoundPlayer = function()
+    -- Остановка SoundPlayer
+end
+
+Universal.StartSpawnESP = function()
+    -- Логика SpawnESP
+end
+
+Universal.StopSpawnESP = function()
+    -- Остановка SpawnESP
+end
+
+Universal.StartUsernameHider = function()
+    -- Логика UsernameHider
+end
+
+Universal.StopUsernameHider = function()
+    -- Остановка UsernameHider
+end
+
+Universal.StartViewClip = function()
+    -- Логика ViewClip
+end
+
+Universal.StopViewClip = function()
+    -- Остановка ViewClip
+end
+
+Universal.StartAntiVoid = function()
+    -- Логика AntiVoid
+end
+
+Universal.StopAntiVoid = function()
+    -- Остановка AntiVoid
+end
+
+Universal.StartAtmosphere = function()
+    -- Логика Atmosphere
+end
+
+Universal.StopAtmosphere = function()
+    -- Остановка Atmosphere
+end
+
+Universal.StartGravity = function()
+    -- Логика Gravity
+end
+
+Universal.StopGravity = function()
+    -- Остановка Gravity
+end
+
+Universal.StartLighting = function()
+    -- Логика Lighting
+end
+
+Universal.StopLighting = function()
+    -- Остановка Lighting
+end
+
+Universal.StartSky = function()
+    -- Логика Sky
+end
+
+Universal.StopSky = function()
+    -- Остановка Sky
+end
+
+Universal.StartTimeOfDay = function()
+    -- Логика TimeOfDay
+end
+
+Universal.StopTimeOfDay = function()
+    -- Остановка TimeOfDay
+end
+
+Universal.StartAntiAFK = function()
+    -- Логика AntiAFK
+end
+
+Universal.StopAntiAFK = function()
+    -- Остановка AntiAFK
+end
+
+Universal.StartAntiFling = function()
+    -- Логика AntiFling
+end
+
+Universal.StopAntiFling = function()
+    -- Остановка AntiFling
+end
+
+Universal.StartAntiKick = function()
+    -- Логика AntiKick
+end
+
+Universal.StopAntiKick = function()
+    -- Остановка AntiKick
+end
+
+Universal.StartAutoRejoin = function()
+    -- Логика AutoRejoin
+end
+
+Universal.StopAutoRejoin = function()
+    -- Остановка AutoRejoin
+end
+
+Universal.StartCameraUnlock = function()
+    -- Логика CameraUnlock
+end
+
+Universal.StopCameraUnlock = function()
+    -- Остановка CameraUnlock
+end
+
+Universal.StartChatSpammer = function()
+    -- Логика ChatSpammer
+end
+
+Universal.StopChatSpammer = function()
+    -- Остановка ChatSpammer
+end
+
+Universal.StartCustomAnimations = function()
+    -- Логика CustomAnimations
+end
+
+Universal.StopCustomAnimations = function()
+    -- Остановка CustomAnimations
+end
+
+Universal.StartConsoleCommands = function()
+    -- Логика ConsoleCommands
+end
+
+Universal.StopConsoleCommands = function()
+    -- Остановка ConsoleCommands
+end
+
+Universal.StartFPSUnlocker = function()
+    -- Логика FPSUnlocker
+end
+
+Universal.StopFPSUnlocker = function()
+    -- Остановка FPSUnlocker
+end
