@@ -2,7 +2,7 @@ local players = game:GetService("Players")
 local userInputService = game:GetService("UserInputService")
 local lplr = players.LocalPlayer
 local camera = workspace.CurrentCamera
-local friends = shared.expensive and shared.expensive.Friends or {}
+
 local handler = {
     players = {},
     entities = {},
@@ -218,15 +218,6 @@ function handler:getValidTargets(mode, maxTargets)
     return LimitedTargets
 end
 
-function handler:isFriend(name)
-    for _, friend in next, friends do
-        if friend == name or name == friend then
-            return true
-        end
-    end
-    return false
-end
-
 function handler:getPlrByCharacter(character)
     for _, plr in next, players:GetPlayers() do
         if plr.Character == character then
@@ -257,7 +248,7 @@ end
 function handler:getEntity(character)
     for _, entity in handler.entities do
         if entity.player == character or entity.Character == character then
-            return entity, _
+            return entity
         end
     end
     return
@@ -338,7 +329,6 @@ function handler:start()
     if handler.started then return end
     handler.started = true
     
-    -- Ждём появления персонажа
     repeat
         task.wait(0.5)
     until lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
