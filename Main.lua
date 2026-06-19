@@ -37,6 +37,7 @@ shared.expensive = shared.expensive or {
     Developer = false,
     StartTick = tick(),
     NotificationsEnabled = true,
+    ScreenGui = nil,
     
     -- Состояния функций
     KillAuraEnabled = false,
@@ -159,14 +160,21 @@ end
 print("[Main.lua]: Загрузка модулей...")
 
 -- ============================================
--- ВАЖНО: Сначала загружаем fix_gui.lua
+-- СНАЧАЛА ЗАГРУЖАЕМ fix_gui
 -- ============================================
 local fixGui = loadModule("fix_gui")
 if fixGui then
-    print("[Main.lua]: fix_gui загружен и выполнен")
+    print("[Main.lua]: fix_gui загружен")
 else
     warn("[Main.lua]: Ошибка загрузки fix_gui")
 end
+
+-- Даем время fix_gui создать ScreenGui
+task.wait(0.5)
+
+-- ============================================
+-- ОСТАЛЬНЫЕ МОДУЛИ
+-- ============================================
 
 -- 1. GuiLibrary
 local GuiLibrary = loadModule("GuiLibrary")
@@ -199,7 +207,7 @@ if toolHandler then
     print("[Main.lua]: ToolHandler загружен")
 end
 
--- 5. Universal (основные функции)
+-- 5. Universal
 local Universal = loadModule("Universal")
 if Universal then
     shared.expensive.Universal = Universal
@@ -219,7 +227,7 @@ if toolHandler then
     end)
 end
 
--- 6. expensive-gui (интерфейс)
+-- 6. expensive-gui
 local expensiveGui = loadModule("expensive-gui")
 if expensiveGui then
     print("[Main.lua]: expensive-gui загружен")
