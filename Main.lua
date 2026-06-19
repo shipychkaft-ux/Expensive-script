@@ -6,7 +6,7 @@ local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 
 local GITHUB_USERNAME = "shipychkaft-ux"
-local REPO_NAME = "expensive-script"
+local REPO_NAME = "Expensive-script"
 local BRANCH = "main"
 
 local BASE_URL = "https://raw.githubusercontent.com/" .. GITHUB_USERNAME .. "/" .. REPO_NAME .. "/refs/heads/" .. BRANCH .. "/"
