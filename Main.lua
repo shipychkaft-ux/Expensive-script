@@ -176,10 +176,10 @@ if espLibrary then
     print("[Main.lua]: EspLibrary загружен")
 end
 
--- 3. playersHandler
-local playersHandler = loadModule("playersHandler")
+-- 3. playerHandler (исправлено имя файла)
+local playersHandler = loadModule("playerHandler")  -- <-- ИСПРАВЛЕНО
 if playersHandler then
-    shared.expensive.PlayersHandler = playerHandler
+    shared.expensive.PlayersHandler = playersHandler  -- <-- ИСПРАВЛЕНО
     print("[Main.lua]: PlayersHandler загружен")
 end
 
