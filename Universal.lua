@@ -6,6 +6,13 @@
 
 repeat task.wait() until game:IsLoaded()
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- ✅ БЕЗОПАСНОЕ ОЖИДАНИЕ ПЕРСОНАЖА ПЕРЕД ИНИЦИАЛИЗАЦИЕЙ ПЕРЕМЕННЫХ
+repeat task.wait(0.1) 
+until LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("Humanoid")
+
 local startTick = tick()
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -21,10 +28,8 @@ local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
 local debris = game:GetService("Debris")
 
-local LocalPlayer = Players.LocalPlayer
 local localPlayer = Players.LocalPlayer
 local lplr = Players.LocalPlayer
 local Character = LocalPlayer.Character
