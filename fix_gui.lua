@@ -1,115 +1,144 @@
--- fix_gui.lua - Исправление GUI
--- Выполнить этот скрипт ПЕРВЫМ!
+-- fix_gui.lua - ПОЛНОЕ исправление GUI
+print("[fix_gui.lua]: Запуск исправления GUI...")
 
-print("[fix_gui.lua]: Исправление GUI...")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 
--- 1. Отключаем все обработчики из expensiv_3_1.lua
-local function disableOldHandlers()
-    -- Ищем и отключаем скрипты open и destroyer из старого GUI
-    local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-    
-    for _, gui in pairs(playerGui:GetChildren()) do
-        if gui.Name == "expa" then
-            -- Отключаем все LocalScript внутри
-            for _, script in pairs(gui:GetDescendants()) do
-                if script:IsA("LocalScript") and (script.Name == "open" or script.Name == "destroyer" or script.Name == "drag") then
-                    script.Disabled = true
-                    print("[fix_gui.lua]: Отключен скрипт:", script.Name)
-                end
+-- ============================================
+-- 1. ПОЛНОСТЬЮ УДАЛЯЕМ СТАРЫЙ GUI
+-- ============================================
+local function removeOldGUI()
+    -- Удаляем из PlayerGui
+    if LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") then
+        for _, gui in pairs(LocalPlayer.PlayerGui:GetChildren()) do
+            if gui.Name == "expa" or gui.Name == "Expensive" then
+                gui:Destroy()
+                print("[fix_gui.lua]: Удален старый GUI из PlayerGui:", gui.Name)
             end
+        end
+    end
+    
+    -- Удаляем из CoreGui
+    for _, gui in pairs(CoreGui:GetChildren()) do
+        if gui.Name == "expa" or gui.Name == "Expensive" or gui.Name == "ExpensiveGUI" then
+            gui:Destroy()
+            print("[fix_gui.lua]: Удален старый GUI из CoreGui:", gui.Name)
         end
     end
 end
 
--- 2. Создаем правильный обработчик для GUI
-local function createProperGuiHandler()
-    local UIS = game:GetService("UserInputService")
+-- ============================================
+-- 2. СОЗДАЕМ НОВЫЙ SCREENGUI
+-- ============================================
+local function createNewGUI()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "ExpensiveGUI"
+    screenGui.Parent = CoreGui
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.DisplayOrder = 999
+    
+    -- Сохраняем в shared
+    if shared.expensive then
+        shared.expensive.ScreenGui = screenGui
+    end
+    
+    print("[fix_gui.lua]: Создан новый ScreenGui")
+    return screenGui
+end
+
+-- ============================================
+-- 3. ОБРАБОТЧИК КЛАВИШИ RIGHT SHIFT
+-- ============================================
+local function setupKeyHandler(screenGui)
     local guiVisible = true
-    local screenGui = shared.expensive and shared.expensive.ScreenGui
-    
-    -- Если ScreenGui не найден, ищем его
-    if not screenGui then
-        local playerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-        for _, gui in pairs(playerGui:GetChildren()) do
-            if gui.Name == "expa" then
-                screenGui = gui
-                if shared.expensive then
-                    shared.expensive.ScreenGui = gui
-                end
-                break
-            end
-        end
-    end
-    
-    -- Если все еще не найден, создаем новый ScreenGui
-    if not screenGui then
-        screenGui = Instance.new("ScreenGui")
-        screenGui.Name = "ExpensiveGUI"
-        screenGui.Parent = game:GetService("CoreGui")
-        screenGui.ResetOnSpawn = false
-        screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-        if shared.expensive then
-            shared.expensive.ScreenGui = screenGui
-        end
-        print("[fix_gui.lua]: Создан новый ScreenGui")
-    end
     
     -- Убеждаемся, что GUI видим
     screenGui.Enabled = true
     
-    -- Обработчик клавиши RightShift
-    UIS.InputBegan:Connect(function(input, gameProcessed)
+    -- Функция для воспроизведения звука
+    local function playSound(soundId)
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://" .. soundId
+        sound.Volume = 0.5
+        sound.Parent = screenGui
+        sound:Play()
+        task.delay(0.5, function() 
+            if sound and sound.Parent then
+                sound:Destroy() 
+            end
+        end)
+    end
+    
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if input.KeyCode == Enum.KeyCode.RightShift and not gameProcessed then
             guiVisible = not guiVisible
             
             if guiVisible then
                 -- Показываем GUI, скрываем мышку
-                UIS.MouseBehavior = Enum.MouseBehavior.LockCenter
-                UIS.MouseIconEnabled = false
                 screenGui.Enabled = true
-                
-                -- Звук включения
-                local sound = Instance.new("Sound")
-                sound.SoundId = "rbxassetid://95856755098572"
-                sound.Volume = 0.5
-                sound.Parent = screenGui
-                sound:Play()
-                task.delay(0.5, function() sound:Destroy() end)
+                UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+                UserInputService.MouseIconEnabled = false
+                playSound("95856755098572") -- звук включения
+                print("[fix_gui.lua]: GUI показан")
             else
                 -- Скрываем GUI, показываем мышку
-                UIS.MouseBehavior = Enum.MouseBehavior.Default
-                UIS.MouseIconEnabled = true
                 screenGui.Enabled = false
-                
-                -- Звук выключения
-                local sound = Instance.new("Sound")
-                sound.SoundId = "rbxassetid://74014422539208"
-                sound.Volume = 0.5
-                sound.Parent = screenGui
-                sound:Play()
-                task.delay(0.5, function() sound:Destroy() end)
+                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+                UserInputService.MouseIconEnabled = true
+                playSound("74014422539208") -- звук выключения
+                print("[fix_gui.lua]: GUI скрыт")
             end
         end
     end)
     
-    print("[fix_gui.lua]: Обработчик GUI установлен")
-    return screenGui
+    print("[fix_gui.lua]: Обработчик клавиш установлен")
 end
 
--- 3. Выполняем исправления
+-- ============================================
+-- 4. ПЕРЕМЕЩАЕМ ВСЕ ЭЛЕМЕНТЫ ИЗ СТАРОГО GUI В НОВЫЙ
+-- ============================================
+local function migrateOldElements(newScreenGui)
+    -- Ищем старый GUI в PlayerGui
+    if LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui") then
+        for _, gui in pairs(LocalPlayer.PlayerGui:GetChildren()) do
+            if gui.Name == "expa" or gui.Name == "Expensive" then
+                -- Переносим все элементы в новый GUI
+                for _, child in pairs(gui:GetChildren()) do
+                    child.Parent = newScreenGui
+                end
+                -- Удаляем пустой старый GUI
+                gui:Destroy()
+                print("[fix_gui.lua]: Элементы перенесены из старого GUI")
+                break
+            end
+        end
+    end
+end
+
+-- ============================================
+-- 5. ВЫПОЛНЕНИЕ
+-- ============================================
 task.spawn(function()
     -- Ждем загрузки игрока
-    repeat task.wait(0.1) until game:GetService("Players").LocalPlayer and game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+    repeat task.wait(0.1) until LocalPlayer and LocalPlayer:FindFirstChild("PlayerGui")
     
-    -- Отключаем старые обработчики
-    disableOldHandlers()
+    -- Удаляем старый GUI
+    removeOldGUI()
     
-    -- Создаем новый обработчик
-    local screenGui = createProperGuiHandler()
+    -- Создаем новый
+    local screenGui = createNewGUI()
     
-    -- Показываем уведомление
+    -- Настраиваем обработчик клавиш
+    setupKeyHandler(screenGui)
+    
+    -- Даем время на загрузку других модулей
+    task.wait(0.5)
+    
+    -- Если GuiLibrary загружен, создаем уведомление
     if shared.expensive and shared.expensive.GuiLibrary then
-        task.wait(0.5)
         shared.expensive.GuiLibrary:CreateNotification(
             "GUI Fixed",
             "Press RightShift to toggle GUI",
@@ -118,7 +147,10 @@ task.spawn(function()
         )
     end
     
-    print("[fix_gui.lua]: Исправление GUI завершено!")
+    print("[fix_gui.lua]: GUI полностью исправлен!")
 end)
 
-return true
+-- Экспортируем функцию для доступа из других скриптов
+return {
+    ScreenGui = shared.expensive and shared.expensive.ScreenGui
+}
