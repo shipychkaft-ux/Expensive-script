@@ -179,7 +179,7 @@ end
 -- 3. playersHandler
 local playersHandler = loadModule("playersHandler")
 if playersHandler then
-    shared.expensive.PlayersHandler = playersHandler
+    shared.expensive.PlayersHandler = playerHandler
     print("[Main.lua]: PlayersHandler загружен")
 end
 
