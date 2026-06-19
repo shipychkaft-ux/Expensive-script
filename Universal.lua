@@ -48,7 +48,8 @@ local JobId = game.JobId
 local CurrentTool = nil
 local allplayers = {}
 
-local Mana = shared.Mana
+-- ✅ ИСПРАВЛЕНО: shared.Mana → shared.expensive
+local Mana = shared.expensive
 local GuiLibrary = Mana.GuiLibrary
 local Tabs = Mana.Tabs
 local Functions = Mana.Functions
@@ -58,7 +59,9 @@ local friends = Mana.Friends
 local playersHandler = Mana.PlayersHandler
 local toolHandler = Mana.ToolHandler
 local espLibrary = Mana.EspLibrary
-local guifont = GuiLibrary.Font
+
+-- ✅ ИСПРАВЛЕНО: проверка на nil
+local guifont = GuiLibrary and GuiLibrary.Font or Enum.Font.Arial
 Mana.StartTick = startTick
 
 playersHandler:start()
