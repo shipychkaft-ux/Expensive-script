@@ -156,8 +156,17 @@ local function loadModule(moduleName)
     return nil
 end
 
--- Загружаем модули в правильном порядке
 print("[Main.lua]: Загрузка модулей...")
+
+-- ============================================
+-- ВАЖНО: Сначала загружаем fix_gui.lua
+-- ============================================
+local fixGui = loadModule("fix_gui")
+if fixGui then
+    print("[Main.lua]: fix_gui загружен и выполнен")
+else
+    warn("[Main.lua]: Ошибка загрузки fix_gui")
+end
 
 -- 1. GuiLibrary
 local GuiLibrary = loadModule("GuiLibrary")
@@ -176,9 +185,10 @@ if espLibrary then
     print("[Main.lua]: EspLibrary загружен")
 end
 
-local playersHandler = loadModule("playerHandler")  -- без 's'
+-- 3. playerHandler
+local playersHandler = loadModule("playerHandler")
 if playersHandler then
-    shared.expensive.PlayersHandler = playersHandler  -- с 's' для совместимости
+    shared.expensive.PlayersHandler = playersHandler
     print("[Main.lua]: PlayersHandler загружен")
 end
 
@@ -196,7 +206,7 @@ if Universal then
     print("[Main.lua]: Universal загружен")
 end
 
--- Запускаем обработчики в изолированных потоках
+-- Запускаем обработчики
 if playersHandler then
     task.spawn(function()
         pcall(function() playersHandler:start() end)
@@ -225,7 +235,7 @@ task.spawn(function()
     if GuiLibrary and GuiLibrary.CreateNotification then
         GuiLibrary:CreateNotification(
             "Expensive Script",
-            "Loaded successfully! Press RightShift to open GUI.",
+            "Press RightShift to toggle GUI",
             5,
             "Info"
         )
