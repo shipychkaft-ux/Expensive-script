@@ -21,9 +21,47 @@ local function getCharacter(plr)
 end
 
 function handler:tryAgain()
-    warn("[toolHandler.lua]: local player is not alive or realcharacter is missing, trying again in 5 seconds.")
-    task.wait(5)
-    handler:start()
+    warn("[toolHandler.lua]: local player is not alive or realcharacter is missing, trying again in 2 seconds.")
+    task.delay(2, function() handler:start() end)
+end
+
+function handler:start()
+    if handler.started then return end -- Защита от спама запусков
+
+    if not shared.expensive or not shared.expensive.PlayersHandler then
+        warn("[toolHandler.lua]: PlayersHandler not found, waiting...")
+        task.delay(2, function() handler:start() end) -- Асинхронный вызов вместо рекурсии
+        return
+    end
+    
+    if (not isAlive() and getCharacter(lplr) == nil) then
+        handler:tryAgain()
+        return 
+    end
+    
+    local entityHandler = shared.expensive.PlayersHandler
+    
+    if not entityHandler.realcharacter then
+        warn("[toolHandler.lua]: realcharacter is nil, waiting...")
+        task.delay(2, function() handler:start() end)
+        return
+    end
+    
+    handler.started = true
+    if connection then connection:Disconnect() end
+    if connection2 then connection2:Disconnect() end
+
+    connection = entityHandler.realcharacter.ChildAdded:Connect(function(Child)
+        if Child:IsA("Tool") then
+            handler.currentTool = Child
+        end
+    end)
+    
+    connection2 = entityHandler.realcharacter.ChildRemoved:Connect(function(Child)
+        if Child:IsA("Tool") then
+            handler.currentTool = nil
+        end
+    end)
 end
 
 function handler:start()
