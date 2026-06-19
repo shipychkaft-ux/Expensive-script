@@ -1,8 +1,3 @@
---[[
-    tool handler module
-    
-    Made by Maanaaaa
-]]
 local players = game:GetService("Players")
 local lplr = players.LocalPlayer
 local connection
@@ -32,8 +27,8 @@ function handler:tryAgain()
 end
 
 function handler:start()
-    -- Проверяем что PlayersHandler загружен
-    if not shared.expensive or not shared.expensive.playerHandler then
+    -- Проверяем что PlayersHandler загружен (исправлено: PlayersHandler с большой 'P')
+    if not shared.expensive or not shared.expensive.PlayersHandler then
         warn("[toolHandler.lua]: PlayersHandler not found, waiting 5 seconds...")
         task.wait(5)
         handler:start()
