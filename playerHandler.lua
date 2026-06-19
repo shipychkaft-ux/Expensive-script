@@ -329,24 +329,27 @@ function handler:start()
     if handler.started then return end
     handler.started = true
     
-    repeat
-        task.wait(0.5)
-    until lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
-    
-    for _, plr in next, players:GetPlayers() do
-        if plr.Character then
-            handler:addPlayer(plr.Character, plr)
+    -- Оборачиваем в task.spawn, чтобы не стопить Main.lua!
+    task.spawn(function()
+        repeat
+            task.wait(0.5)
+        until lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
+        
+        for _, plr in next, players:GetPlayers() do
+            if plr.Character then
+                handler:addPlayer(plr.Character, plr)
+            end
         end
-    end
-    
-    handler.connections["playerAdded"] = players.PlayerAdded:Connect(function(plr)
-        plr.CharacterAdded:Connect(function(character)
-            handler:addPlayer(character, plr)
+        
+        handler.connections["playerAdded"] = players.PlayerAdded:Connect(function(plr)
+            plr.CharacterAdded:Connect(function(character)
+                handler:addPlayer(character, plr)
+            end)
         end)
-    end)
-    
-    handler.connections["playerRemoving"] = players.PlayerRemoving:Connect(function(plr)
-        handler:removePlayer(plr)
+        
+        handler.connections["playerRemoving"] = players.PlayerRemoving:Connect(function(plr)
+            handler:removePlayer(plr)
+        end)
     end)
 end
 
