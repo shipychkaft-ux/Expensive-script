@@ -7,9 +7,27 @@ local LocalPlayer = Players.LocalPlayer
 
 local GITHUB_USERNAME = "shipychkaft-ux"
 local REPO_NAME = "expensive-script"
+local BRANCH = "main"
 
-local BASE_URL = "https://raw.githubusercontent.com/" .. GITHUB_USERNAME .. "/" .. REPO_NAME .. "/main/"
+local BASE_URL = "https://raw.githubusercontent.com/" .. GITHUB_USERNAME .. "/" .. REPO_NAME .. "/refs/heads/" .. BRANCH .. "/"
 
+-- Создаём папки для конфигов
+local function createFolders()
+    local folders = {
+        "expensive",
+        "expensive/Config",
+        "expensive/Assets",
+        "expensive/Scripts"
+    }
+    for _, folder in ipairs(folders) do
+        if not isfolder(folder) then
+            pcall(makefolder, folder)
+        end
+    end
+end
+createFolders()
+
+-- Инициализация shared.expensive
 shared.expensive = shared.expensive or {
     Loaded = false,
     Connections = {},
@@ -18,10 +36,60 @@ shared.expensive = shared.expensive or {
     Friends = {},
     Developer = false,
     StartTick = tick(),
+    NotificationsEnabled = true,
+    
+    -- Состояния функций
+    KillAuraEnabled = false,
+    KillAuraDistance = 10,
+    KillAuraMode = "Long",
+    AimbotEnabled = false,
+    AutoClickerEnabled = false,
+    ReachEnabled = false,
+    
+    SpeedEnabled = false,
+    SpeedValue = 50,
+    InfinityJumpEnabled = false,
+    AutoWalkEnabled = false,
+    ClickTPEnabled = false,
+    FastFallEnabled = false,
+    FlyEnabled = false,
+    HighJumpEnabled = false,
+    LongJumpEnabled = false,
+    PhaseEnabled = false,
+    SpinBotEnabled = false,
+    
+    FullbrightEnabled = false,
+    FOVChangerEnabled = false,
+    NameTagsEnabled = false,
+    BreadcrumbsEnabled = false,
+    ChinaHatEnabled = false,
+    CrossHairEnabled = false,
+    RainbowSkinEnabled = false,
+    SnowingEnabled = false,
+    SoundPlayerEnabled = false,
+    SpawnESPEnabled = false,
+    UsernameHiderEnabled = false,
+    ViewClipEnabled = false,
+    
+    AntiVoidEnabled = false,
+    AtmosphereEnabled = false,
+    GravityEnabled = false,
+    LightingEnabled = false,
+    SkyEnabled = false,
+    TimeOfDayEnabled = false,
+    
+    AntiAFKEnabled = false,
+    AntiFlingEnabled = false,
+    AntiKickEnabled = false,
+    AutoRejoinEnabled = false,
+    CameraUnlockEnabled = false,
+    ChatSpammerEnabled = false,
+    CustomAnimationsEnabled = false,
+    ConsoleCommandsEnabled = false,
+    FPSUnlockerEnabled = false,
     
     RunLoops = {
         _bindings = {},
-        _renderBindings = {},
         _steppedBindings = {},
         
         BindToHeartbeat = function(self, name, func)
@@ -61,39 +129,6 @@ shared.expensive = shared.expensive or {
         end
     },
     
-    Device = "PC",
-    Scale = 1,
-    MobileScale = 0.45,
-    Sounds = true,
-    SoundsVolume = 1,
-    GuiKeybind = "RightShift",
-    Toggled = false,
-    NotificationsMode = "Built-in",
-    SliderRightClick = false,
-    SliderCanOverride = false,
-    uiCornersRadius = 0,
-    hoverText = {
-        Enabled = true,
-        Position = "Above mouse"
-    },
-    Objects = {},
-    APIs = {},
-    pinnedobjects = {},
-    rainbowObjects = {},
-    ColorBox = Color3.fromRGB(170, 0, 170),
-    ScreenGui = nil,
-    ClickGui = nil,
-    keyStrokesGui = nil,
-    hoverTextGui = nil,
-    SearchFrame = nil,
-    UIScale = nil,
-    TabsFrame = nil,
-    Notifications = true,
-    ConfigLoaded = false,
-    CanLoadConfig = false,
-    CanSaveConfig = true,
-    autoSaveDelay = 5,
-    
     ObjectsToSave = {
         Tabs = {},
         Toggles = {},
@@ -107,17 +142,6 @@ local function betterDisconnect(connection)
     end
 end
 
-local function spawn(func)
-    return coroutine.wrap(func)()
-end
-
-local function runFunction(func)
-    return func()
-end
-
-local loadedModules = {}
-local failedModules = {}
-
 local function loadModule(moduleName)
     local url = BASE_URL .. moduleName .. ".lua"
     
@@ -127,57 +151,82 @@ local function loadModule(moduleName)
     end)
     
     if success and result then
-        loadedModules[moduleName] = result
         return result
-    else
-        failedModules[moduleName] = result
-        return nil
     end
+    return nil
 end
 
+-- Загружаем модули в правильном порядке
+print("[Main.lua]: Загрузка модулей...")
+
+-- 1. GuiLibrary
 local GuiLibrary = loadModule("GuiLibrary")
 if GuiLibrary then
     shared.expensive.GuiLibrary = GuiLibrary
-    GuiLibrary:CreateWindow()
+    print("[Main.lua]: GuiLibrary загружен")
+else
+    warn("[Main.lua]: Ошибка загрузки GuiLibrary")
+    return
 end
 
+-- 2. espLibrary
 local espLibrary = loadModule("espLibrary")
 if espLibrary then
     shared.expensive.EspLibrary = espLibrary
+    print("[Main.lua]: EspLibrary загружен")
 end
 
+-- 3. playersHandler
 local playersHandler = loadModule("playersHandler")
 if playersHandler then
     shared.expensive.PlayersHandler = playersHandler
+    print("[Main.lua]: PlayersHandler загружен")
 end
 
+-- 4. toolHandler
 local toolHandler = loadModule("toolHandler")
 if toolHandler then
     shared.expensive.ToolHandler = toolHandler
+    print("[Main.lua]: ToolHandler загружен")
 end
 
+-- 5. Universal (основные функции)
 local Universal = loadModule("Universal")
 if Universal then
     shared.expensive.Universal = Universal
+    print("[Main.lua]: Universal загружен")
 end
 
-local MM2Module = loadModule("142823291")
-if MM2Module then
-    shared.expensive.MM2Module = MM2Module
-end
-
+-- Запускаем обработчики
 if playersHandler then
-    playersHandler:start()
+    pcall(function() playersHandler:start() end)
 end
 
 if toolHandler then
-    toolHandler:start()
+    pcall(function() toolHandler:start() end)
+end
+
+-- 6. expensive-gui (интерфейс)
+local expensiveGui = loadModule("expensive-gui")
+if expensiveGui then
+    print("[Main.lua]: expensive-gui загружен")
 end
 
 shared.expensive.Loaded = true
 
-task.wait(0.5)
+print("[Main.lua]: Все модули загружены!")
 
-if GuiLibrary and GuiLibrary.LoadConfig then
-    GuiLibrary:LoadConfig()
-end
+-- Уведомление о загрузке
+task.spawn(function()
+    task.wait(1)
+    if GuiLibrary and GuiLibrary.CreateNotification then
+        GuiLibrary:CreateNotification(
+            "Expensive Script",
+            "Loaded successfully! Press RightShift to open GUI.",
+            5,
+            "Info"
+        )
+    end
+end)
+
+return true
