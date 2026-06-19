@@ -6,11 +6,13 @@ end
 local Tabs = shared.expensive.Tabs or {}
 local Connections = shared.expensive.Connections or {}
 local Universal = shared.expensive.Universal
-local PlayersHandler = shared.expensive.PlayersHandler or shared.expensive.playerHandler
+-- PlayersHandler не используется в этом файле, но можно оставить для совместимости
+local PlayersHandler = shared.expensive.PlayersHandler
 local ToolHandler = shared.expensive.ToolHandler
 local EspLibrary = shared.expensive.EspLibrary
 local RunLoops = shared.expensive.RunLoops
 
+-- Создаём окно
 local Window = GuiLibrary:CreateWindow()
 
 -- ============================================
