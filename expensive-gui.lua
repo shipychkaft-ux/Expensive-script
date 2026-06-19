@@ -9,6 +9,7 @@ local Universal = shared.expensive.Universal
 local PlayersHandler = shared.expensive.PlayersHandler
 local ToolHandler = shared.expensive.ToolHandler
 local EspLibrary = shared.expensive.EspLibrary
+local RunLoops = shared.expensive.RunLoops
 
 local Window = GuiLibrary:CreateWindow()
 
@@ -25,10 +26,9 @@ local killAura = Tabs.Combat:CreateToggle({
     Name = "KillAura",
     HoverText = "Automatically kills nearby players",
     Callback = function(enabled)
+        shared.expensive.KillAuraEnabled = enabled
         if Universal then
-            Universal.KillAuraEnabled = enabled
             if enabled then
-                -- Запускаем KillAura через Universal
                 Universal:StartKillAura()
             else
                 Universal:StopKillAura()
@@ -44,6 +44,7 @@ killAura:CreateSlider({
     Default = 10,
     Round = 1,
     Callback = function(v)
+        shared.expensive.KillAuraDistance = v
         if Universal then Universal.KillAuraDistance = v end
     end
 })
@@ -53,6 +54,7 @@ killAura:CreateDropdown({
     List = {"Long", "Short", "Medium"},
     Default = "Long",
     Callback = function(v)
+        shared.expensive.KillAuraMode = v
         if Universal then Universal.KillAuraMode = v end
     end
 })
@@ -62,6 +64,7 @@ Tabs.Combat:CreateToggle({
     Name = "Aimbot",
     HoverText = "Automatically aims at players",
     Callback = function(enabled)
+        shared.expensive.AimbotEnabled = enabled
         if Universal then Universal.AimbotEnabled = enabled end
     end
 })
@@ -71,6 +74,7 @@ Tabs.Combat:CreateToggle({
     Name = "AutoClicker",
     HoverText = "Automatically clicks for you",
     Callback = function(enabled)
+        shared.expensive.AutoClickerEnabled = enabled
         if Universal then Universal.AutoClickerEnabled = enabled end
     end
 })
@@ -80,6 +84,7 @@ Tabs.Combat:CreateToggle({
     Name = "Reach",
     HoverText = "Expands hitboxes of other players",
     Callback = function(enabled)
+        shared.expensive.ReachEnabled = enabled
         if Universal then Universal.ReachEnabled = enabled end
     end
 })
@@ -97,8 +102,8 @@ local speed = Tabs.Movement:CreateToggle({
     Name = "Speed",
     HoverText = "Makes you faster",
     Callback = function(enabled)
+        shared.expensive.SpeedEnabled = enabled
         if Universal then
-            Universal.SpeedEnabled = enabled
             if enabled then
                 Universal:StartSpeed()
             else
@@ -115,6 +120,7 @@ speed:CreateSlider({
     Default = 50,
     Round = 0,
     Callback = function(v)
+        shared.expensive.SpeedValue = v
         if Universal then Universal.SpeedValue = v end
     end
 })
@@ -124,8 +130,8 @@ Tabs.Movement:CreateToggle({
     Name = "Infinity Jump",
     HoverText = "Allows you to jump infinitely",
     Callback = function(enabled)
+        shared.expensive.InfinityJumpEnabled = enabled
         if Universal then
-            Universal.InfinityJumpEnabled = enabled
             if enabled then
                 Universal:StartInfinityJump()
             else
@@ -140,6 +146,7 @@ Tabs.Movement:CreateToggle({
     Name = "AutoWalk",
     HoverText = "Automatically walks forward",
     Callback = function(enabled)
+        shared.expensive.AutoWalkEnabled = enabled
         if Universal then Universal.AutoWalkEnabled = enabled end
     end
 })
@@ -149,6 +156,7 @@ Tabs.Movement:CreateToggle({
     Name = "ClickTP",
     HoverText = "Teleports you to where you click",
     Callback = function(enabled)
+        shared.expensive.ClickTPEnabled = enabled
         if Universal then Universal.ClickTPEnabled = enabled end
     end
 })
@@ -158,6 +166,7 @@ Tabs.Movement:CreateToggle({
     Name = "FastFall",
     HoverText = "Makes you fall faster",
     Callback = function(enabled)
+        shared.expensive.FastFallEnabled = enabled
         if Universal then Universal.FastFallEnabled = enabled end
     end
 })
@@ -167,8 +176,8 @@ Tabs.Movement:CreateToggle({
     Name = "Fly",
     HoverText = "Makes you fly",
     Callback = function(enabled)
+        shared.expensive.FlyEnabled = enabled
         if Universal then
-            Universal.FlyEnabled = enabled
             if enabled then
                 Universal:StartFly()
             else
@@ -183,6 +192,7 @@ Tabs.Movement:CreateToggle({
     Name = "HighJump",
     HoverText = "Makes you jump higher",
     Callback = function(enabled)
+        shared.expensive.HighJumpEnabled = enabled
         if Universal then Universal.HighJumpEnabled = enabled end
     end
 })
@@ -192,6 +202,7 @@ Tabs.Movement:CreateToggle({
     Name = "LongJump",
     HoverText = "Makes you jump forward",
     Callback = function(enabled)
+        shared.expensive.LongJumpEnabled = enabled
         if Universal then Universal.LongJumpEnabled = enabled end
     end
 })
@@ -201,8 +212,8 @@ Tabs.Movement:CreateToggle({
     Name = "Phase",
     HoverText = "Makes you walk through walls",
     Callback = function(enabled)
+        shared.expensive.PhaseEnabled = enabled
         if Universal then
-            Universal.PhaseEnabled = enabled
             if enabled then
                 Universal:StartPhase()
             else
@@ -217,8 +228,8 @@ Tabs.Movement:CreateToggle({
     Name = "SpinBot",
     HoverText = "Makes your character spin",
     Callback = function(enabled)
+        shared.expensive.SpinBotEnabled = enabled
         if Universal then
-            Universal.SpinBotEnabled = enabled
             if enabled then
                 Universal:StartSpinBot()
             else
@@ -275,8 +286,8 @@ Tabs.Render:CreateToggle({
     Name = "Fullbright",
     HoverText = "Makes everything bright",
     Callback = function(enabled)
+        shared.expensive.FullbrightEnabled = enabled
         if Universal then
-            Universal.FullbrightEnabled = enabled
             if enabled then
                 Universal:StartFullbright()
             else
@@ -291,8 +302,8 @@ Tabs.Render:CreateToggle({
     Name = "FOV Changer",
     HoverText = "Changes your field of view",
     Callback = function(enabled)
+        shared.expensive.FOVChangerEnabled = enabled
         if Universal then
-            Universal.FOVChangerEnabled = enabled
             if enabled then
                 Universal:StartFOVChanger()
             else
@@ -322,8 +333,8 @@ Tabs.Render:CreateToggle({
     Name = "NameTags",
     HoverText = "Shows nametags above players",
     Callback = function(enabled)
+        shared.expensive.NameTagsEnabled = enabled
         if Universal then
-            Universal.NameTagsEnabled = enabled
             if enabled then
                 Universal:StartNameTags()
             else
@@ -338,8 +349,8 @@ Tabs.Render:CreateToggle({
     Name = "Breadcrumbs",
     HoverText = "Creates a trail behind you",
     Callback = function(enabled)
+        shared.expensive.BreadcrumbsEnabled = enabled
         if Universal then
-            Universal.BreadcrumbsEnabled = enabled
             if enabled then
                 Universal:StartBreadcrumbs()
             else
@@ -354,8 +365,8 @@ Tabs.Render:CreateToggle({
     Name = "ChinaHat",
     HoverText = "Puts a china hat on your head",
     Callback = function(enabled)
+        shared.expensive.ChinaHatEnabled = enabled
         if Universal then
-            Universal.ChinaHatEnabled = enabled
             if enabled then
                 Universal:StartChinaHat()
             else
@@ -370,8 +381,8 @@ Tabs.Render:CreateToggle({
     Name = "CustomCrossHair",
     HoverText = "Changes your crosshair",
     Callback = function(enabled)
+        shared.expensive.CrossHairEnabled = enabled
         if Universal then
-            Universal.CrossHairEnabled = enabled
             if enabled then
                 Universal:StartCrossHair()
             else
@@ -386,8 +397,8 @@ Tabs.Render:CreateToggle({
     Name = "RainbowSkin",
     HoverText = "Makes your skin rainbow",
     Callback = function(enabled)
+        shared.expensive.RainbowSkinEnabled = enabled
         if Universal then
-            Universal.RainbowSkinEnabled = enabled
             if enabled then
                 Universal:StartRainbowSkin()
             else
@@ -402,8 +413,8 @@ Tabs.Render:CreateToggle({
     Name = "Snowing",
     HoverText = "Makes it snow in game",
     Callback = function(enabled)
+        shared.expensive.SnowingEnabled = enabled
         if Universal then
-            Universal.SnowingEnabled = enabled
             if enabled then
                 Universal:StartSnowing()
             else
@@ -418,8 +429,8 @@ Tabs.Render:CreateToggle({
     Name = "SoundPlayer",
     HoverText = "Plays music",
     Callback = function(enabled)
+        shared.expensive.SoundPlayerEnabled = enabled
         if Universal then
-            Universal.SoundPlayerEnabled = enabled
             if enabled then
                 Universal:StartSoundPlayer()
             else
@@ -434,8 +445,8 @@ Tabs.Render:CreateToggle({
     Name = "SpawnESP",
     HoverText = "Highlights spawn locations",
     Callback = function(enabled)
+        shared.expensive.SpawnESPEnabled = enabled
         if Universal then
-            Universal.SpawnESPEnabled = enabled
             if enabled then
                 Universal:StartSpawnESP()
             else
@@ -450,8 +461,8 @@ Tabs.Render:CreateToggle({
     Name = "UsernameHider",
     HoverText = "Hides your username",
     Callback = function(enabled)
+        shared.expensive.UsernameHiderEnabled = enabled
         if Universal then
-            Universal.UsernameHiderEnabled = enabled
             if enabled then
                 Universal:StartUsernameHider()
             else
@@ -466,8 +477,8 @@ Tabs.Render:CreateToggle({
     Name = "ViewClip",
     HoverText = "Makes camera go through objects",
     Callback = function(enabled)
+        shared.expensive.ViewClipEnabled = enabled
         if Universal then
-            Universal.ViewClipEnabled = enabled
             if enabled then
                 Universal:StartViewClip()
             else
@@ -490,8 +501,8 @@ Tabs.World:CreateToggle({
     Name = "AntiVoid",
     HoverText = "Prevents falling into void",
     Callback = function(enabled)
+        shared.expensive.AntiVoidEnabled = enabled
         if Universal then
-            Universal.AntiVoidEnabled = enabled
             if enabled then
                 Universal:StartAntiVoid()
             else
@@ -506,8 +517,8 @@ Tabs.World:CreateToggle({
     Name = "Atmosphere",
     HoverText = "Customizes atmosphere",
     Callback = function(enabled)
+        shared.expensive.AtmosphereEnabled = enabled
         if Universal then
-            Universal.AtmosphereEnabled = enabled
             if enabled then
                 Universal:StartAtmosphere()
             else
@@ -522,8 +533,8 @@ Tabs.World:CreateToggle({
     Name = "Gravity",
     HoverText = "Changes game gravity",
     Callback = function(enabled)
+        shared.expensive.GravityEnabled = enabled
         if Universal then
-            Universal.GravityEnabled = enabled
             if enabled then
                 Universal:StartGravity()
             else
@@ -538,8 +549,8 @@ Tabs.World:CreateToggle({
     Name = "Lighting",
     HoverText = "Customizes lighting",
     Callback = function(enabled)
+        shared.expensive.LightingEnabled = enabled
         if Universal then
-            Universal.LightingEnabled = enabled
             if enabled then
                 Universal:StartLighting()
             else
@@ -554,8 +565,8 @@ Tabs.World:CreateToggle({
     Name = "Sky",
     HoverText = "Customizes sky",
     Callback = function(enabled)
+        shared.expensive.SkyEnabled = enabled
         if Universal then
-            Universal.SkyEnabled = enabled
             if enabled then
                 Universal:StartSky()
             else
@@ -570,8 +581,8 @@ Tabs.World:CreateToggle({
     Name = "TimeOfDay",
     HoverText = "Changes time of day",
     Callback = function(enabled)
+        shared.expensive.TimeOfDayEnabled = enabled
         if Universal then
-            Universal.TimeOfDayEnabled = enabled
             if enabled then
                 Universal:StartTimeOfDay()
             else
@@ -594,8 +605,8 @@ Tabs.Utility:CreateToggle({
     Name = "AntiAFK",
     HoverText = "Prevents being kicked for idling",
     Callback = function(enabled)
+        shared.expensive.AntiAFKEnabled = enabled
         if Universal then
-            Universal.AntiAFKEnabled = enabled
             if enabled then
                 Universal:StartAntiAFK()
             else
@@ -610,8 +621,8 @@ Tabs.Utility:CreateToggle({
     Name = "AntiFling",
     HoverText = "Prevents being flung",
     Callback = function(enabled)
+        shared.expensive.AntiFlingEnabled = enabled
         if Universal then
-            Universal.AntiFlingEnabled = enabled
             if enabled then
                 Universal:StartAntiFling()
             else
@@ -626,8 +637,8 @@ Tabs.Utility:CreateToggle({
     Name = "AntiKick",
     HoverText = "Prevents client kicks",
     Callback = function(enabled)
+        shared.expensive.AntiKickEnabled = enabled
         if Universal then
-            Universal.AntiKickEnabled = enabled
             if enabled then
                 Universal:StartAntiKick()
             else
@@ -642,8 +653,8 @@ Tabs.Utility:CreateToggle({
     Name = "AutoRejoin",
     HoverText = "Auto rejoins when kicked",
     Callback = function(enabled)
+        shared.expensive.AutoRejoinEnabled = enabled
         if Universal then
-            Universal.AutoRejoinEnabled = enabled
             if enabled then
                 Universal:StartAutoRejoin()
             else
@@ -658,8 +669,8 @@ Tabs.Utility:CreateToggle({
     Name = "CameraUnlock",
     HoverText = "Unlocks camera zoom",
     Callback = function(enabled)
+        shared.expensive.CameraUnlockEnabled = enabled
         if Universal then
-            Universal.CameraUnlockEnabled = enabled
             if enabled then
                 Universal:StartCameraUnlock()
             else
@@ -674,8 +685,8 @@ Tabs.Utility:CreateToggle({
     Name = "ChatSpammer",
     HoverText = "Automatically sends messages",
     Callback = function(enabled)
+        shared.expensive.ChatSpammerEnabled = enabled
         if Universal then
-            Universal.ChatSpammerEnabled = enabled
             if enabled then
                 Universal:StartChatSpammer()
             else
@@ -690,8 +701,8 @@ Tabs.Utility:CreateToggle({
     Name = "CustomAnimations",
     HoverText = "Customizes your animations",
     Callback = function(enabled)
+        shared.expensive.CustomAnimationsEnabled = enabled
         if Universal then
-            Universal.CustomAnimationsEnabled = enabled
             if enabled then
                 Universal:StartCustomAnimations()
             else
@@ -706,8 +717,8 @@ Tabs.Utility:CreateToggle({
     Name = "ConsoleCommands",
     HoverText = "Creates command bar in dev console",
     Callback = function(enabled)
+        shared.expensive.ConsoleCommandsEnabled = enabled
         if Universal then
-            Universal.ConsoleCommandsEnabled = enabled
             if enabled then
                 Universal:StartConsoleCommands()
             else
@@ -722,8 +733,8 @@ Tabs.Utility:CreateToggle({
     Name = "FPSUnlocker",
     HoverText = "Unlocks your FPS",
     Callback = function(enabled)
+        shared.expensive.FPSUnlockerEnabled = enabled
         if Universal then
-            Universal.FPSUnlockerEnabled = enabled
             if enabled then
                 Universal:StartFPSUnlocker()
             else
@@ -742,6 +753,13 @@ Tabs.Utility:CreateToggle({
             local plr = game.Players.LocalPlayer
             if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
                 plr.Character.Humanoid.Health = 0
+            end
+            -- Автоматически выключаем тоггл
+            task.wait(0.1)
+            for _, table in next, GuiLibrary.ObjectsToSave.Toggles do
+                if table.API.Name == "Reset" then
+                    table.API:Toggle(true)
+                end
             end
         end
     end
@@ -771,8 +789,16 @@ Tabs.Utility:CreateToggle({
     HoverText = "Disables all toggles",
     Callback = function(enabled)
         if enabled then
+            GuiLibrary.CanSaveConfig = false
             for _, table in next, GuiLibrary.ObjectsToSave.Toggles do
                 if table.API.Enabled and table.API.Name ~= "Panic" then
+                    table.API:Toggle(true)
+                end
+            end
+            -- Автоматически выключаем Panic
+            task.wait(0.1)
+            for _, table in next, GuiLibrary.ObjectsToSave.Toggles do
+                if table.API.Name == "Panic" then
                     table.API:Toggle(true)
                 end
             end
@@ -788,6 +814,14 @@ local function handleGuiOpen()
     local state = false
     local screenGui = shared.expensive.ScreenGui
     
+    -- Если ScreenGui нет, ищем его
+    if not screenGui then
+        screenGui = GuiLibrary and GuiLibrary.ScreenGui
+        if screenGui then
+            shared.expensive.ScreenGui = screenGui
+        end
+    end
+    
     UIS.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.RightShift then
             state = not state
@@ -796,14 +830,16 @@ local function handleGuiOpen()
                 UIS.MouseBehavior = Enum.MouseBehavior.Default
                 UIS.MouseIconEnabled = true
                 
+                -- Скрываем GUI
                 if screenGui then
                     screenGui.Enabled = false
                 end
             else
-                -- Скрываем мышку
-                UIS.MouseBehavior = Enum.MouseBehavior.Default
+                -- Скрываем мышку (возвращаем в игру)
+                UIS.MouseBehavior = Enum.MouseBehavior.LockCenter
                 UIS.MouseIconEnabled = false
                 
+                -- Показываем GUI
                 if screenGui then
                     screenGui.Enabled = true
                 end
@@ -814,4 +850,6 @@ end
 
 task.spawn(handleGuiOpen)
 
+-- Сохраняем Tabs
 shared.expensive.Tabs = Tabs
+
