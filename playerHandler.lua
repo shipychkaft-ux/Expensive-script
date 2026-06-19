@@ -2,7 +2,7 @@ local players = game:GetService("Players")
 local userInputService = game:GetService("UserInputService")
 local lplr = players.LocalPlayer
 local camera = workspace.CurrentCamera
-local friends = shared.expensive.Friends
+local friends = shared.expensive and shared.expensive.Friends or {}
 local handler = {
     players = {},
     entities = {},
@@ -85,40 +85,29 @@ function handler:getNearPlayers(distance)
     return nearPlayers
 end
 
---[[
-function handler:getColorFromPlayer(plr) 
-    if plr.Team ~= nil then return plr.TeamColor.Color end
-end
-]]
-
--- this was made by Wowzers
 function handler:convertHealthToColor(health, maxHealth)
-    -- Input validation
     if type(health) ~= "number" or type(maxHealth) ~= "number" then
-        return Color3.fromRGB(255, 255, 255) -- Default white for invalid inputs
+        return Color3.fromRGB(255, 255, 255)
     end
 
     if maxHealth <= 0 then
-        return Color3.fromRGB(255, 0, 0) -- Red for invalid max health
+        return Color3.fromRGB(255, 0, 0)
     end
 
     if health <= 0 then
-        return Color3.fromRGB(255, 0, 0) -- Red for zero health
+        return Color3.fromRGB(255, 0, 0)
     end
 
-    -- Calculate health percentage (0 to 100)
     local percent = math.clamp((health / maxHealth) * 100, 0, 100)
 
-    -- Define color ranges
     local colors = {
-        {percent = 0,   r = 255, g = 0,   b = 0},   -- Red at 0%
-        {percent = 30,  r = 255, g = 71,  b = 71},  -- Light red at 30%
-        {percent = 50,  r = 255, g = 196, b = 0},   -- Yellow at 50%
-        {percent = 70,  r = 180, g = 225, b = 25},  -- Yellow-green at 70%
-        {percent = 100, r = 96,  g = 253, b = 48}   -- Green at 100%
+        {percent = 0,   r = 255, g = 0,   b = 0},
+        {percent = 30,  r = 255, g = 71,  b = 71},
+        {percent = 50,  r = 255, g = 196, b = 0},
+        {percent = 70,  r = 180, g = 225, b = 25},
+        {percent = 100, r = 96,  g = 253, b = 48}
     }
 
-    -- Find the two color points to interpolate between
     local lowerColor, upperColor
 
     for i = 1, #colors - 1 do
@@ -129,26 +118,14 @@ function handler:convertHealthToColor(health, maxHealth)
         end
     end
 
-    -- Calculate interpolation factor between the two color points
     local range = upperColor.percent - lowerColor.percent
     local factor = (percent - lowerColor.percent) / range
 
-    -- Interpolate RGB values
     local r = math.floor(lowerColor.r + (upperColor.r - lowerColor.r) * factor)
     local g = math.floor(lowerColor.g + (upperColor.g - lowerColor.g) * factor)
     local b = math.floor(lowerColor.b + (upperColor.b - lowerColor.b) * factor)
 
     return Color3.fromRGB(r, g, b)
-end
-
--- this was made by Wowzers too
-local function IsInRange(player, distance, part)
-    if not handler:isAlive(player) or not handler:isAlive() then return false end
-    
-    local TargetRoot = player.Character:FindFirstChild(part) or player.Character.HumanoidRootPart
-    local Distance = (handler.character.humanoidRootPart.Position - TargetRoot.Position).Magnitude
-    
-    return Distance <= distance
 end
 
 function handler:isVisible(pos, wallCheck, ...)
@@ -190,7 +167,7 @@ function handler:getValidTargets(mode, maxTargets)
     
     for _, player in ipairs(players:GetPlayers()) do
         pcall(function()
-            if player ~= lplr and handler:isAlive(player) and handler:isInRange(player) and not handler:isSameTeam(player) and not handler:isIgnored(player) and IsWhitelisted(player) then
+            if player ~= lplr and handler:isAlive(player) and handler:isPlayerTargetable(player, true) then
                 table.insert(ValidTargets, player)
             end
         end)
@@ -233,7 +210,6 @@ function handler:getValidTargets(mode, maxTargets)
         end)
     end
     
-    -- Limit the number of targets
     local LimitedTargets = {}
     for i = 1, math.min(#ValidTargets, maxTargets) do
         table.insert(LimitedTargets, ValidTargets[i])
@@ -309,14 +285,13 @@ function handler:addEntity(character, plr, func)
                 teamCheck = func or function() end
             }
             if plr == lplr then
-                handler.character = table.unpack(ent)
+                handler.character = ent
                 handler.realcharacter = character
                 handler.alive = handler:isAlive()
             else
                 ent.targetable = handler:targetCheck(plr)
-                handler.entities[plr] = table.unpack(ent)
+                handler.entities[plr] = ent
             end
-        else
         end
     end)
 end
@@ -329,7 +304,6 @@ function handler:removeEntity(character)
         end
         table.clear(entity.connections)
         table.remove(handler.entities, index)
-        --table.remove(handler.threads, character)
     end
 end
 
@@ -343,12 +317,11 @@ function handler:addPlayer(character, plr)
     handler:addEntity(character, plr)
     handler.connections[plr] = {
         plr.CharacterAdded:Connect(function(character)
-        handler:updateEntity(character, plr)
-    end),
-
-    plr.CharacterRemoving:Connect(function()
-        handler:removeEntity(plr.Character)
-    end)
+            handler:updateEntity(character, plr)
+        end),
+        plr.CharacterRemoving:Connect(function()
+            handler:removeEntity(plr.Character)
+        end)
     }
 end
 
@@ -356,7 +329,7 @@ function handler:removePlayer(plr)
     if handler.players[plr] == nil then return end
     handler.players[plr] = nil
     handler:removeEntity(plr.Character)
-    for  _, connection in next, handler.connections[plr] do
+    for _, connection in next, handler.connections[plr] do
         connection:Disconnect()
     end
 end
@@ -364,12 +337,24 @@ end
 function handler:start()
     if handler.started then return end
     handler.started = true
+    
+    -- Ждём появления персонажа
+    repeat
+        task.wait(0.5)
+    until lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
+    
     for _, plr in next, players:GetPlayers() do
-        handler:addPlayer(plr.Character, plr)
+        if plr.Character then
+            handler:addPlayer(plr.Character, plr)
+        end
     end
+    
     handler.connections["playerAdded"] = players.PlayerAdded:Connect(function(plr)
-        handler:addPlayer(plr.Character, plr)
+        plr.CharacterAdded:Connect(function(character)
+            handler:addPlayer(character, plr)
+        end)
     end)
+    
     handler.connections["playerRemoving"] = players.PlayerRemoving:Connect(function(plr)
         handler:removePlayer(plr)
     end)
