@@ -26,16 +26,17 @@ local function getCharacter(plr)
 end
 
 function handler:tryAgain()
-    warn("[ManaV2ForRoblox/toolHandler.lua]: local player is not alive or realcharacter is missing, trying again in 5 seconds.")
-    wait(5)
+    warn("[toolHandler.lua]: local player is not alive or realcharacter is missing, trying again in 5 seconds.")
+    task.wait(5)
     handler:start()
 end
+
 function handler:start()
-    if (not isAlive() and getCharacter(lplr) == nil) or not shared.Mana.PlayersHandler then 
+    if (not isAlive() and getCharacter(lplr) == nil) or not shared.expensive.PlayersHandler then 
         handler:tryAgain()
         return 
     end
-    local entityHandler = shared.Mana.PlayersHandler
+    local entityHandler = shared.expensive.PlayersHandler
     handler.started = true
     if connection then connection:Disconnect() end
     if connection2 then connection2:Disconnect() end
