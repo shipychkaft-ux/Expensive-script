@@ -6,7 +6,6 @@ end
 local Tabs = shared.expensive.Tabs or {}
 local Connections = shared.expensive.Connections or {}
 local Universal = shared.expensive.Universal
--- PlayersHandler не используется в этом файле, но можно оставить для совместимости
 local PlayersHandler = shared.expensive.PlayersHandler
 local ToolHandler = shared.expensive.ToolHandler
 local EspLibrary = shared.expensive.EspLibrary
@@ -14,6 +13,23 @@ local RunLoops = shared.expensive.RunLoops
 
 -- Создаём окно
 local Window = GuiLibrary:CreateWindow()
+
+-- ============================================
+-- ЗВУКИ ДЛЯ GUI
+-- ============================================
+local function PlayGUISound(soundId)
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://" .. soundId
+    sound.Volume = 0.5
+    sound.Parent = game:GetService("CoreGui")
+    sound:Play()
+    task.delay(sound.TimeLength or 0.5, function()
+        sound:Destroy()
+    end)
+end
+
+local SOUND_ENABLE = "95856755098572"  -- звук включения
+local SOUND_DISABLE = "74014422539208" -- звук выключения
 
 -- ============================================
 -- COMBAT TAB
@@ -32,8 +48,10 @@ local killAura = Tabs.Combat:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartKillAura()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopKillAura()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -68,6 +86,7 @@ Tabs.Combat:CreateToggle({
     Callback = function(enabled)
         shared.expensive.AimbotEnabled = enabled
         if Universal then Universal.AimbotEnabled = enabled end
+        if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
     end
 })
 
@@ -78,6 +97,7 @@ Tabs.Combat:CreateToggle({
     Callback = function(enabled)
         shared.expensive.AutoClickerEnabled = enabled
         if Universal then Universal.AutoClickerEnabled = enabled end
+        if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
     end
 })
 
@@ -88,6 +108,7 @@ Tabs.Combat:CreateToggle({
     Callback = function(enabled)
         shared.expensive.ReachEnabled = enabled
         if Universal then Universal.ReachEnabled = enabled end
+        if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
     end
 })
 
@@ -108,8 +129,10 @@ local speed = Tabs.Movement:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartSpeed()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopSpeed()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -136,8 +159,10 @@ Tabs.Movement:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartInfinityJump()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopInfinityJump()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -150,6 +175,7 @@ Tabs.Movement:CreateToggle({
     Callback = function(enabled)
         shared.expensive.AutoWalkEnabled = enabled
         if Universal then Universal.AutoWalkEnabled = enabled end
+        if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
     end
 })
 
@@ -160,6 +186,7 @@ Tabs.Movement:CreateToggle({
     Callback = function(enabled)
         shared.expensive.ClickTPEnabled = enabled
         if Universal then Universal.ClickTPEnabled = enabled end
+        if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
     end
 })
 
@@ -170,6 +197,7 @@ Tabs.Movement:CreateToggle({
     Callback = function(enabled)
         shared.expensive.FastFallEnabled = enabled
         if Universal then Universal.FastFallEnabled = enabled end
+        if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
     end
 })
 
@@ -182,8 +210,10 @@ Tabs.Movement:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartFly()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopFly()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -196,6 +226,7 @@ Tabs.Movement:CreateToggle({
     Callback = function(enabled)
         shared.expensive.HighJumpEnabled = enabled
         if Universal then Universal.HighJumpEnabled = enabled end
+        if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
     end
 })
 
@@ -206,6 +237,7 @@ Tabs.Movement:CreateToggle({
     Callback = function(enabled)
         shared.expensive.LongJumpEnabled = enabled
         if Universal then Universal.LongJumpEnabled = enabled end
+        if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
     end
 })
 
@@ -218,8 +250,10 @@ Tabs.Movement:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartPhase()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopPhase()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -234,8 +268,10 @@ Tabs.Movement:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartSpinBot()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopSpinBot()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -257,8 +293,10 @@ local esp = Tabs.Render:CreateToggle({
         if EspLibrary then
             if enabled then
                 EspLibrary:start()
+                PlayGUISound(SOUND_ENABLE)
             else
                 EspLibrary:stop()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -292,8 +330,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartFullbright()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopFullbright()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -308,8 +348,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartFOVChanger()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopFOVChanger()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -321,11 +363,8 @@ Tabs.Render:CreateToggle({
     HoverText = "Shows which keys you press",
     Callback = function(enabled)
         if GuiLibrary.APIs and GuiLibrary.APIs.KeyStrokes then
-            if enabled then
-                GuiLibrary.APIs.KeyStrokes:toggle()
-            else
-                GuiLibrary.APIs.KeyStrokes:toggle()
-            end
+            GuiLibrary.APIs.KeyStrokes:toggle()
+            if enabled then PlayGUISound(SOUND_ENABLE) else PlayGUISound(SOUND_DISABLE) end
         end
     end
 })
@@ -339,8 +378,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartNameTags()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopNameTags()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -355,8 +396,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartBreadcrumbs()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopBreadcrumbs()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -371,8 +414,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartChinaHat()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopChinaHat()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -387,8 +432,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartCrossHair()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopCrossHair()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -403,8 +450,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartRainbowSkin()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopRainbowSkin()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -419,8 +468,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartSnowing()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopSnowing()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -435,8 +486,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartSoundPlayer()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopSoundPlayer()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -451,8 +504,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartSpawnESP()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopSpawnESP()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -467,8 +522,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartUsernameHider()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopUsernameHider()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -483,8 +540,10 @@ Tabs.Render:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartViewClip()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopViewClip()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -507,8 +566,10 @@ Tabs.World:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartAntiVoid()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopAntiVoid()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -523,8 +584,10 @@ Tabs.World:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartAtmosphere()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopAtmosphere()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -539,8 +602,10 @@ Tabs.World:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartGravity()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopGravity()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -555,8 +620,10 @@ Tabs.World:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartLighting()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopLighting()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -571,8 +638,10 @@ Tabs.World:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartSky()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopSky()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -587,8 +656,10 @@ Tabs.World:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartTimeOfDay()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopTimeOfDay()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -611,8 +682,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartAntiAFK()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopAntiAFK()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -627,8 +700,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartAntiFling()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopAntiFling()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -643,8 +718,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartAntiKick()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopAntiKick()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -659,8 +736,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartAutoRejoin()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopAutoRejoin()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -675,8 +754,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartCameraUnlock()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopCameraUnlock()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -691,8 +772,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartChatSpammer()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopChatSpammer()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -707,8 +790,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartCustomAnimations()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopCustomAnimations()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -723,8 +808,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartConsoleCommands()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopConsoleCommands()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -739,8 +826,10 @@ Tabs.Utility:CreateToggle({
         if Universal then
             if enabled then
                 Universal:StartFPSUnlocker()
+                PlayGUISound(SOUND_ENABLE)
             else
                 Universal:StopFPSUnlocker()
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end
@@ -756,7 +845,7 @@ Tabs.Utility:CreateToggle({
             if plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") then
                 plr.Character.Humanoid.Health = 0
             end
-            -- Автоматически выключаем тоггл
+            PlayGUISound(SOUND_DISABLE)
             task.wait(0.1)
             for _, table in next, GuiLibrary.ObjectsToSave.Toggles do
                 if table.API.Name == "Reset" then
@@ -771,6 +860,7 @@ Tabs.Utility:CreateToggle({
 Tabs.Utility:CreateButton({
     Name = "Rejoin",
     Callback = function()
+        PlayGUISound(SOUND_ENABLE)
         local TeleportService = game:GetService("TeleportService")
         TeleportService:Teleport(game.PlaceId, game.Players.LocalPlayer)
     end
@@ -780,6 +870,7 @@ Tabs.Utility:CreateButton({
 Tabs.Utility:CreateButton({
     Name = "Server Hop",
     Callback = function()
+        PlayGUISound(SOUND_ENABLE)
         local TeleportService = game:GetService("TeleportService")
         TeleportService:Teleport(game.PlaceId)
     end
@@ -791,13 +882,13 @@ Tabs.Utility:CreateToggle({
     HoverText = "Disables all toggles",
     Callback = function(enabled)
         if enabled then
+            PlayGUISound(SOUND_DISABLE)
             GuiLibrary.CanSaveConfig = false
             for _, table in next, GuiLibrary.ObjectsToSave.Toggles do
                 if table.API.Enabled and table.API.Name ~= "Panic" then
                     table.API:Toggle(true)
                 end
             end
-            -- Автоматически выключаем Panic
             task.wait(0.1)
             for _, table in next, GuiLibrary.ObjectsToSave.Toggles do
                 if table.API.Name == "Panic" then
@@ -809,14 +900,13 @@ Tabs.Utility:CreateToggle({
 })
 
 -- ============================================
--- ОБРАБОТЧИК ОТКРЫТИЯ GUI (ПОКАЗ МЫШКИ)
+-- ОБРАБОТЧИК ОТКРЫТИЯ GUI (ИСПРАВЛЕННЫЙ)
 -- ============================================
-local function handleGuiOpen()
+local function setupGuiToggle()
     local UIS = game:GetService("UserInputService")
-    local state = false
+    local guiVisible = true  -- GUI изначально видим
     local screenGui = shared.expensive.ScreenGui
     
-    -- Если ScreenGui нет, ищем его
     if not screenGui then
         screenGui = GuiLibrary and GuiLibrary.ScreenGui
         if screenGui then
@@ -824,34 +914,40 @@ local function handleGuiOpen()
         end
     end
     
+    -- Убедимся, что GUI видим при старте
+    if screenGui then
+        screenGui.Enabled = true
+    end
+    
     UIS.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.RightShift then
-            state = not state
-            if state then
-                -- Показываем мышку
-                UIS.MouseBehavior = Enum.MouseBehavior.Default
-                UIS.MouseIconEnabled = true
-                
-                -- Скрываем GUI
-                if screenGui then
-                    screenGui.Enabled = false
-                end
-            else
-                -- Скрываем мышку (возвращаем в игру)
+            guiVisible = not guiVisible
+            
+            if guiVisible then
+                -- GUI видим, мышка в игре
                 UIS.MouseBehavior = Enum.MouseBehavior.LockCenter
                 UIS.MouseIconEnabled = false
-                
-                -- Показываем GUI
                 if screenGui then
                     screenGui.Enabled = true
                 end
+                PlayGUISound(SOUND_ENABLE)
+            else
+                -- GUI скрыт, мышка свободна
+                UIS.MouseBehavior = Enum.MouseBehavior.Default
+                UIS.MouseIconEnabled = true
+                if screenGui then
+                    screenGui.Enabled = false
+                end
+                PlayGUISound(SOUND_DISABLE)
             end
         end
     end)
 end
 
-task.spawn(handleGuiOpen)
+-- Запускаем обработчик
+task.spawn(setupGuiToggle)
 
 -- Сохраняем Tabs
 shared.expensive.Tabs = Tabs
 
+print("[expensive-gui.lua]: GUI загружен успешно!")
