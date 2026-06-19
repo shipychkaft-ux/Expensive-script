@@ -33,7 +33,7 @@ end
 
 function handler:start()
     -- Проверяем что PlayersHandler загружен
-    if not shared.expensive or not shared.expensive.PlayersHandler then
+    if not shared.expensive or not shared.expensive.playerHandler then
         warn("[toolHandler.lua]: PlayersHandler not found, waiting 5 seconds...")
         task.wait(5)
         handler:start()
