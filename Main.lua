@@ -196,13 +196,17 @@ if Universal then
     print("[Main.lua]: Universal загружен")
 end
 
--- Запускаем обработчики
+-- Запускаем обработчики в изолированных потоках
 if playersHandler then
-    pcall(function() playersHandler:start() end)
+    task.spawn(function()
+        pcall(function() playersHandler:start() end)
+    end)
 end
 
 if toolHandler then
-    pcall(function() toolHandler:start() end)
+    task.spawn(function()
+        pcall(function() toolHandler:start() end)
+    end)
 end
 
 -- 6. expensive-gui (интерфейс)
