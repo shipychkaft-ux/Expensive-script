@@ -32,11 +32,30 @@ function handler:tryAgain()
 end
 
 function handler:start()
-    if (not isAlive() and getCharacter(lplr) == nil) or not shared.expensive.PlayersHandler then 
+    -- Проверяем что PlayersHandler загружен
+    if not shared.expensive or not shared.expensive.PlayersHandler then
+        warn("[toolHandler.lua]: PlayersHandler not found, waiting 5 seconds...")
+        task.wait(5)
+        handler:start()
+        return
+    end
+    
+    -- Проверяем что персонаж существует
+    if (not isAlive() and getCharacter(lplr) == nil) then
         handler:tryAgain()
         return 
     end
+    
     local entityHandler = shared.expensive.PlayersHandler
+    
+    -- Проверяем что realcharacter существует
+    if not entityHandler.realcharacter then
+        warn("[toolHandler.lua]: realcharacter is nil, waiting...")
+        task.wait(2)
+        handler:start()
+        return
+    end
+    
     handler.started = true
     if connection then connection:Disconnect() end
     if connection2 then connection2:Disconnect() end
@@ -54,8 +73,23 @@ function handler:start()
     end)
 end
 
-lplr.CharacterAdded:Connect(function()
+-- Ждём появления персонажа
+task.spawn(function()
+    repeat
+        task.wait(0.5)
+    until lplr.Character and lplr.Character:FindFirstChildOfClass("Humanoid")
+    
     if handler.started then
+        handler:start()
+    end
+end)
+
+-- Также запускаем при добавлении персонажа
+lplr.CharacterAdded:Connect(function()
+    task.wait(1)
+    if handler.started then
+        handler:start()
+    else
         handler:start()
     end
 end)
