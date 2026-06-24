@@ -38,6 +38,7 @@ shared.expensive = shared.expensive or {
     StartTick = tick(),
     NotificationsEnabled = true,
     ScreenGui = nil,
+    GuiReady = false,
     
     -- Состояния функций
     KillAuraEnabled = false,
@@ -160,7 +161,19 @@ end
 print("[Main.lua]: Загрузка модулей...")
 
 -- ============================================
--- СНАЧАЛА ЗАГРУЖАЕМ fix_gui
+-- СНАЧАЛА ЗАГРУЖАЕМ GuiLibrary
+-- ============================================
+local GuiLibrary = loadModule("GuiLibrary")
+if GuiLibrary then
+    shared.expensive.GuiLibrary = GuiLibrary
+    print("[Main.lua]: GuiLibrary загружен")
+else
+    warn("[Main.lua]: Ошибка загрузки GuiLibrary")
+    return
+end
+
+-- ============================================
+-- ПОТОМ fix_gui
 -- ============================================
 local fixGui = loadModule("fix_gui")
 if fixGui then
@@ -175,16 +188,6 @@ task.wait(0.5)
 -- ============================================
 -- ОСТАЛЬНЫЕ МОДУЛИ
 -- ============================================
-
--- 1. GuiLibrary
-local GuiLibrary = loadModule("GuiLibrary")
-if GuiLibrary then
-    shared.expensive.GuiLibrary = GuiLibrary
-    print("[Main.lua]: GuiLibrary загружен")
-else
-    warn("[Main.lua]: Ошибка загрузки GuiLibrary")
-    return
-end
 
 -- 2. espLibrary
 local espLibrary = loadModule("espLibrary")
