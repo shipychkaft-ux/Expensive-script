@@ -75,7 +75,9 @@ function library:create(name, oneObject, custom)
 
     function api:removeAllEspObjects()
         for _, plr in next, players:GetPlayers() do
-            api:removeEspObject(plr)
+            if plr ~= localPlayer then
+                api:removeEspObject(plr)
+            end
         end
     end
 
@@ -86,6 +88,7 @@ function library:create(name, oneObject, custom)
             character = obj
         else
             if plr == localPlayer then return end
+            if not api.teammates and plr.Team == localPlayer.Team then return end
             character = plr.Character
             if not character then return end
 
@@ -136,24 +139,23 @@ function library:create(name, oneObject, custom)
 
     function api:updateAll()
         for _, plr in next, players:GetPlayers() do
+            if plr == localPlayer then continue end
+            if not api.teammates and plr.Team == localPlayer.Team then continue end
             if isAlive(plr) then
                 api:updateEspObject(plr)
             end
         end
     end
 
-    -- Вспомогательная функция для регистрации игрока (исправляет баг захода новых игроков)
     local function setupPlayer(plr)
         if plr == localPlayer then return end
         
-        -- Обновляем ESP, если у него уже есть персонаж
         if isAlive(plr) then
             api:updateEspObject(plr)
         end
         
-        -- Подключаем отслеживание респавна персонажа
         local chAdded = plr.CharacterAdded:Connect(function()
-            task.wait(0.1) -- Небольшая задержка, чтобы части тела успели загрузиться
+            task.wait(0.1)
             if api.enabled then
                 api:updateEspObject(plr)
             end
@@ -163,12 +165,10 @@ function library:create(name, oneObject, custom)
 
     function api:start()
         api.enabled = true
-        -- Настраиваем всех текущих игроков на сервере
         for _, plr in next, players:GetPlayers() do
             setupPlayer(plr)
         end
         
-        -- Исправлено: теперь новые игроки корректно получают слушатель CharacterAdded
         local pAdded = players.PlayerAdded:Connect(function(plr)
             setupPlayer(plr)
         end)
