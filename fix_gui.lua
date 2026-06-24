@@ -104,6 +104,11 @@ task.spawn(function()
     -- Настраиваем обработчик
     setupHandler(screenGui)
     
+    -- Сигнал, что GUI готов
+    if shared.expensive then
+        shared.expensive.GuiReady = true
+    end
+    
     print("[fix_gui.lua]: ГОТОВО! Нажми RightShift для открытия GUI")
 end)
 
