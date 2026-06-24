@@ -1,6 +1,5 @@
 --[[
     Credits to anyones code i used or looked at
-
     Made by Maanaaaa and Wowzers
 ]]
 
@@ -134,10 +133,6 @@ local function GetCustomAsset(path)
     end
 end
 
-local spawn = function(func) 
-    return coroutine.wrap(func)()
-end
-
 local function CreateCoreNotification(title, text, duration)
 	StarterGui:SetCore("SendNotification", {
 		Title = title,
@@ -145,15 +140,6 @@ local function CreateCoreNotification(title, text, duration)
 		Duration = duration,
 	})
 end
-
---[[
-while isAlive() and wait(0.1) do
-    local Tool = Character:FindFirstChildWhichIsA("Tool")
-    if Tool then
-        CurrentTool = Tool
-    end
-end
-]]
 
 -- Players handler part
 local function isAlive(Player, headCheck)
@@ -172,71 +158,6 @@ end
 local function isPlayerTargetable(plr, target)
     return plr ~= LocalPlayer and plr and isAlive(plr) and TargetCheck(plr, target)
 end
-
---[[
-local function getClosestPlayer(MaxDistance, TeamCheck, lowesthealth)
-	local MaximumDistance = MaxDistance
-	local Target = nil
-    local lowest = 100
-    local unsorted = {}
-    local humanoids = {}
-    local sorted = {}
-
-    local function sortByHealth()
-        for i, player in next, unsorted do
-            if isAlive(player) then
-                table.insert(humanoids, player.Character.Humanoid.Health)
-            end
-        end
-        table.sort(humanoids, function(a, b)
-            return a.health < b.health
-        end)
-
-        for i, v in next, humanoids do
-            table.insert(sorted, v.player)
-        end
-    end
-
-    local function checkPlayer(v, byHealth)
-        sortByHealth()
-        if v.Character ~= nil then
-            if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
-                if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
-                    local ScreenPoint = Camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
-                    local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
-                    
-                    if byHealth then
-                        if v == sorted[1] then
-                            Target = v
-                        end
-                    else
-                        if VectorDistance < MaximumDistance then
-                            Target = v
-                        end
-                    end
-                end
-            end
-        end
-        sortByHealth()
-        return sorted[1]
-    end
-
-	for _, v in next, Players:GetPlayers() do
-		if v.Name ~= LocalPlayer.Name then
-            table.insert(unsorted, player)
-			if TeamCheck then
-				if v.Team ~= LocalPlayer.Team then
-					checkPlayer(v)
-				end
-			else
-				checkPlayer(v)
-			end
-		end
-	end
-
-	return Target
-end
-]]
 
 local function getClosestPlayer(MaxDisance, TeamCheck)
 	local MaximumDistance = MaxDisance
@@ -284,7 +205,6 @@ local function GetColorFromPlayer(Player)
 end
 
 local function ConvertHealthToColor(Health, MaxHealth)
-    -- Input validation
     if type(Health) ~= "number" or type(MaxHealth) ~= "number" then
         return Color3.fromRGB(255, 255, 255)
     end
@@ -300,11 +220,11 @@ local function ConvertHealthToColor(Health, MaxHealth)
     local Percent = math.clamp((Health / MaxHealth) * 100, 0, 100)
     
     if Percent >= 70 then
-        return Color3.fromRGB(96, 253, 48) -- Green
+        return Color3.fromRGB(96, 253, 48)
     elseif Percent >= 45 then
-        return Color3.fromRGB(255, 196, 0) -- Yellow
+        return Color3.fromRGB(255, 196, 0)
     else
-        return Color3.fromRGB(255, 71, 71) -- Red
+        return Color3.fromRGB(255, 71, 71)
     end
 end
 
@@ -384,12 +304,11 @@ local function AimAt(Target, Smoothness, AimPart)
     end
 end
 
--- check for CustomAnimations so if any param is missing CustomAnimations wont load, also it was made by ChatGPT (yeah)
 local function CheckForAllAnimateParams(Animate)
-    print("[ManaV2ForRoblox/Universal.lua]: Checking Animate parameters for CustomAnimations...")
+    print("[Universal.lua]: Checking Animate parameters for CustomAnimations...")
 
     if not Animate then
-        warn("[ManaV2ForRoblox/Universal.lua]: CustomAnimations can't be loaded, 'Animate' script is missing!")
+        warn("[Universal.lua]: CustomAnimations can't be loaded, 'Animate' script is missing!")
         return false
     end
 
@@ -408,18 +327,16 @@ local function CheckForAllAnimateParams(Animate)
         local current = Animate
         for _, step in ipairs(path) do
             if not current:FindFirstChild(step) then
-                warn("[ManaV2ForRoblox/Universal.lua]: CustomAnimations can't be loaded, missing: " .. table.concat(path, "."))
+                warn("[Universal.lua]: CustomAnimations can't be loaded, missing: " .. table.concat(path, "."))
                 return false
             end
             current = current[step]
         end
     end
 
-    print("[ManaV2ForRoblox/Universal.lua]: All Animate parameters are valid, CustomAnimations can be loaded.")
+    print("[Universal.lua]: All Animate parameters are valid, CustomAnimations can be loaded.")
     return true
 end
-
-
 
 local function FindTouchInterest(Tool)
     return Tool and Tool:FindFirstChildWhichIsA("TouchTransmitter", true)
@@ -435,7 +352,6 @@ local function findToolWithTouchInterest(plr)
     return
 end
 
--- CanClick is from vape
 local function CanClick()
     local MousePosition = UserInputService:GetMouseLocation() - Vector2.new(0, 36)
     for i,v in pairs(PlayerGui:GetGuiObjectsAtPosition(MousePosition.X, MousePosition.Y)) do
@@ -501,7 +417,10 @@ local function betterDisconnect(connection)
     end
 end
 
--- // Combat tab
+-- ============================================
+-- COMBAT TAB
+-- ============================================
+
 runFunction(function()
     local aimAssist = {Enabled = false}
     local aimPart = {Value = "Head"}
@@ -581,14 +500,6 @@ runFunction(function()
         end
     end
 
-    local function highlightAimTarget(plr, obj)
-        if highlightTarget.Value then
-            espLibrary:updateEspObject(plr, obj)
-        else
-            espLibrary:removeAllEspObjects()
-        end
-    end
-
     aimAssist = Tabs.Combat:CreateToggle({
         Name = "AimAssist",
         HoverText = "Automatically aims at the closest player to your mouse.",
@@ -604,9 +515,6 @@ runFunction(function()
                         if plr and isAlive(plr, aimPart.Value == "Head") then
                             AimAt(plr, smoothness.Value, aimPart.Value)
                             if autoFire.Value then fireShoot(toolCheck.Value) end
-                            --[[if highlightTarget.Value then
-                                highlightAimTarget(plr, highlightMode.Value == "AimPart" and plr.Character:FindFirstChild(aimPart.Value) or plr.Character)
-                            end]]
                         end
                     end
                 end)
@@ -675,100 +583,6 @@ runFunction(function()
         Function = function(v) UpdateCircle() end
     })
 
-    --[[
-    highlightTarget = aimAssist:CreateToggle({
-        Name = "Highlight Target",
-        Default = false,
-        Callback = function(v)
-            if highlightMode.MainObject then highlightMode.MainObject.Visible = v end
-            if highlightOutline.MainObject then highlightOutline.MainObject.Visible = v end
-            if highlightFill.MainObject then highlightFill.MainObject.Visible = v end
-            if highlightTeamColor.MainObject then highlightTeamColor.MainObject.Visible = v end
-        end
-    })
-
-    highlightMode = aimAssist:CreateDropdown({
-        Name = "Highlight Mode",
-        Function = function(v)
-            if aimAssist.Enabled then aimAssist:ReToggle(true) end
-        end,
-        List = {"AimPart", "AimTarget"},
-        Default = "AimPart",
-    })
-    highlightMode.MainObject.Visible = false
-
-    highlightOutline = aimAssist:CreateToggle({
-        Name = "Outline",
-        Default = false,
-        Function = function(v)
-            if highlightOutlineColor.MainObject then highlightOutlineColor.MainObject.Visible = v end
-            if highlightOutlineTransparency.MainObject then highlightOutlineTransparency.MainObject.Visible = v end
-            espLibrary.outline = v
-        end
-    })
-    highlightOutline.MainObject.Visible = false
-
-    highlightOutlineColor = aimAssist:CreateColorSlider({
-        Name = "Outline Color",
-        Value = Color3.fromRGB(255, 255, 255),
-        Function = function(v)
-            espLibrary.outlineColor = v
-        end
-    })
-    highlightOutlineColor.MainObject.Visible = false
-
-    highlightOutlineTransparency = aimAssist:CreateSlider({
-        Name = "Outline Transparency",
-        Function = function(v)
-            espLibrary.outlineTransparency = v
-        end,
-        Min = 0,
-        Max = 1,
-        Default = 0,
-        Round = 1,
-    })
-    highlightOutlineTransparency.MainObject.Visible = false
-
-    highlightFill = aimAssist:CreateToggle({
-        Name = "Fill",
-        Default = false,
-        Function = function(v)
-            if highlightFillColor.MainObject then highlightFillColor.MainObject.Visible = v end
-            if highlightFillTransparency.MainObject then highlightFillTransparency.MainObject.Visible = v end
-            espLibrary.fill = v
-        end
-    })
-    highlightFill.MainObject.Visible = false
-
-    highlightFillColor = aimAssist:CreateColorSlider({
-        Name = "Fill Color",
-        Value = Color3.fromRGB(255, 255, 255),
-        Function = function(v)
-            espLibrary.fillColor = v
-        end
-    })
-    highlightFillColor.MainObject.Visible = false
-
-    highlightFillTransparency = aimAssist:CreateSlider({
-        Name = "Fill Transparency",
-        Function = function(v)
-            espLibrary.fillTransparency = v
-        end,
-        Min = 0,
-        Max = 1,
-        Default = 0,
-        Round = 1,
-    })
-    highlightFillTransparency.MainObject.Visible = false
-
-    highlightTeamColor = aimAssist:CreateToggle({
-        Name = "Team Color",
-        Default = false,
-        Function = function(v) end
-    })
-    highlightTeamColor.MainObject.Visible = false
-    ]]
-
     firstCamCheck = aimAssist:CreateToggle({
         Name = "1st Person Check",
         Default = false,
@@ -803,13 +617,12 @@ runFunction(function()
     toolCheck.MainObject.Visible = false
 end)
 
-
 runFunction(function()
     local autoClicker = {Enabled = false}
     local mode = {Value = "Click"}
     local cps = {Value = 15}
 
-    local autoClicker = Tabs.Combat:CreateToggle({
+    local autoClickerToggle = Tabs.Combat:CreateToggle({
         Name = "AutoClicker",
         HoverText = "Automatically clicks for you.",
         Callback = function(callback)
@@ -829,20 +642,20 @@ runFunction(function()
                             end
                         end
                         wait(1 / cps.Value)
-                    until not autoClicker.Enabled
+                    until not autoClickerToggle.Enabled
                 end)
             end
         end
     })
 
-    mode = autoClicker:CreateDropdown({
+    mode = autoClickerToggle:CreateDropdown({
         Name = "Mode",
         Function = function(v) end,
         List = {"Click", "RightClick", "Tool"},
         Default = "Click"
     })
 
-    cps = autoClicker:CreateSlider({
+    cps = autoClickerToggle:CreateSlider({
         Name = "CPS",
         Function = function() end,
         Min = 0,
@@ -870,7 +683,7 @@ runFunction(function()
         end
     end
 
-    reach = Tabs.Combat:CreateToggle({
+    local reachToggle = Tabs.Combat:CreateToggle({
         Name = "Reach",
         HoverText = "Expands hitboxes of other players.",
         Callback = function(callback)
@@ -894,14 +707,14 @@ runFunction(function()
         end
     })
 
-    expandPart = reach:CreateDropdown({
+    expandPart = reachToggle:CreateDropdown({
         Name = "Expand Part",
         Function = function(v) end,
         List = {"HumanoidRootPart", "Head"},
         Default = "HumanoidRootPart"
     })
 
-    expand = reach:CreateSlider({
+    expand = reachToggle:CreateSlider({
         Name = "Expand Size",
         Min = 1,
         Max = 20,
@@ -910,10 +723,13 @@ runFunction(function()
     })
 end)
 
--- // Movement tab
+-- ============================================
+-- MOVEMENT TAB
+-- ============================================
+
 runFunction(function()
     local autoWalk = {Enabled = false}
-    autoWalk = Tabs.Movement:CreateToggle({
+    local autoWalkToggle = Tabs.Movement:CreateToggle({
         Name = "AutoWalk",
         HoverText = "Automatically walks forward for you.",
         Callback = function(callback)
@@ -941,7 +757,7 @@ runFunction(function()
             getHumanoidRootPart(LocalPlayer).CFrame = Mouse.Hit + Vector3.new(0, 3, 0)
         end 
     end
-    clickTP = Tabs.Movement:CreateToggle({
+    local clickTPToggle = Tabs.Movement:CreateToggle({
         Name = "ClickTP",
         HoverText = "Teleports you to where you clicked.",
         Callback = function(callback) 
@@ -973,10 +789,10 @@ runFunction(function()
         end
     })
 
-    mode = clickTP:CreateDropdown({
+    mode = clickTPToggle:CreateDropdown({
         Name = "Mode",
         Function = function(v)
-            if clickTP.Enabled then clickTP:ReToggle() end
+            if clickTPToggle.Enabled then clickTPToggle:ReToggle() end
         end,
         List = {"Click", "RightClick", "Tool"},
         Default = "Click"
@@ -987,7 +803,7 @@ runFunction(function()
     local fastFall = {Enabled = false}
     local height = {Value = 5}
     local ticks = {Value = 5}
-    fastFall = Tabs.Movement:CreateToggle({
+    local fastFallToggle = Tabs.Movement:CreateToggle({
         Name = "FastFall",
         HoverText = "Makes you fall faster.",
         Callback = function(callback)
@@ -1008,13 +824,13 @@ runFunction(function()
                                 end
                             end
                         end
-                    until not fastFall.Enabled
+                    until not fastFallToggle.Enabled
                 end)
             end
         end
     })
     
-    height = fastFall:CreateSlider({
+    height = fastFallToggle:CreateSlider({
         Name = "FallHeight",
         Function = function(v) end,
         Min = 1,
@@ -1023,7 +839,7 @@ runFunction(function()
         Round = 1
     })
 
-    ticks = fastFall:CreateSlider({
+    ticks = fastFallToggle:CreateSlider({
         Name = "Ticks",
         Function = function(v) end,
         Min = 1,
@@ -1033,8 +849,6 @@ runFunction(function()
     })
 end)
 
--- // fps based a little bit :sob:
--- // 60 fps is the best to avoid going down
 runFunction(function()
     local fly = {Enabled = false}
     local mode = {Value = "Normal"}
@@ -1042,7 +856,7 @@ runFunction(function()
     local speed = {Value = 23}
     local verticalSpeed = {Value = 20}
     local linearVelocity
-    fly = Tabs.Movement:CreateToggle({
+    local flyToggle = Tabs.Movement:CreateToggle({
         Name = "Fly",
         HoverText = "Makes you fly.\nFPS based, recommended FPS is 60.",
         Callback = function(callback)
@@ -1101,7 +915,7 @@ runFunction(function()
         end
     })
 
-    mode = fly:CreateDropdown({
+    mode = flyToggle:CreateDropdown({
         Name = "Mode",
         Function = function(v) 
             if speed.Container then speed.Container.Visible = v == "CFrame" end
@@ -1110,7 +924,7 @@ runFunction(function()
         Default = "Velocity"
     })
 
-    speed = fly:CreateSlider({
+    speed = flyToggle:CreateSlider({
         Name = "Speed",
         Function = function(v) end,
         Min = 1,
@@ -1120,14 +934,14 @@ runFunction(function()
     })
     speed.Container.Visible = false
 
-    keyboardMode = fly:CreateDropdown({
+    keyboardMode = flyToggle:CreateDropdown({
         Name = "KeyboardMode",
         Function = function(v) end,
         List = {"LeftShift+Space", "Q+E", "LeftCtrl+Space"},
         Default = "LeftShift+Space"
     })
 
-    verticalSpeed = fly:CreateSlider({
+    verticalSpeed = flyToggle:CreateSlider({
         Name = "VerticalSpeed",
         Function = function(v) end,
         Min = 1,
@@ -1141,7 +955,7 @@ runFunction(function()
     local forwardTP = {Enabled = false}
     local studs = {Value = 5}
     local teleporting = false
-    forwardTP = Tabs.Movement:CreateToggle({
+    local forwardTPToggle = Tabs.Movement:CreateToggle({
         Name = "ForwardTP",
         HoverText = "Teleports you forward.",
         Callback = function(callback)
@@ -1157,12 +971,12 @@ runFunction(function()
                     end
                 end
                 teleporting = false
-                forwardTP:Toggle(true, false)
+                forwardTPToggle:Toggle(true, false)
             end
         end
     })
     
-    studs = forwardTP:CreateSlider({
+    studs = forwardTPToggle:CreateSlider({
         Name = "Studs",
         Function = function(v) end,
         Min = 1,
@@ -1171,82 +985,6 @@ runFunction(function()
         Round = 0
     })
 end)
-
-
---[[somewhen later
-runFunction(function()
-    local ForwardTPMode = {Value = "TP"}
-    local ForwardTPValue = {Value = 5}
-    local ForwardTPTweenTime = {Value = 0.1}
-    local Teleporting = false
-    
-    ForwardTP = Tabs.Movement:CreateToggle({
-        Name = "ForwardTP",
-        Keybind = nil,
-        Callback = function(callback)
-            if callback and not Teleporting then
-                if isAlive() then
-                    Teleporting = true
-                    local Humanoid = LocalPlayer.Character.Humanoid
-                    local HumanoidRootPart = LocalPlayer.Character.HumanoidRootPart
-                    local LookVector = HumanoidRootPart.LookVector
-                    if Humanoid.MoveDirection.Magnitude > 0 or Humanoid:GetState() == Enum.HumanoidStateType.Running then
-                        local ForwardVector = LookVector * ForwardTPValue.Value
-                        if ForwardTPMode.Value == "TP" then
-                            HumanoidRootPart.CFrame = HumanoidRootPart.CFrame + ForwardVector
-                        elseif ForwardTPMode.Value == "Tween" then
-                            local ForwardTweenInfo = TweenInfo.new(ForwardTPTweenTime.Value)
-                            local Tween = TweenService:Create(HumanoidRootPart, ForwardTweenInfo, {Position = HumanoidRootPart.Position + ForwardVector})
-                            Tween:Play()
-                            wait(ForwardTPTweenTime.Value)
-                            Tween:Cancel()
-                        end
-                    end
-                else
-                    ForwardTP:Toggle(false, false)
-                end
-                Teleporting = false
-                ForwardTP:Toggle(false, false)
-            end
-        end
-    })
-
-    ForwardTPMode = ForwardTP:CreateDropdown({
-        Name = "Mode",
-        List = {"TP", "Tween"},
-        Default = "TP",
-        Function = function(v) 
-            if v == "Tween" then
-                if ForwardTPTweenTime.MainObject then
-                    ForwardTPTweenTime.MainObject.Visible = true
-                end
-            elseif v == "TP" then
-                if ForwardTPTweenTime.MainObject then
-                    ForwardTPTweenTime.MainObject.Visible = false
-                end
-            end
-        end
-    })
-    
-    ForwardTPTweenTime = ForwardTP:CreateSlider({
-        Name = "Tween Time",
-        Function = function(v) end,
-        Min = 0,
-        Max = 5,
-        Default = 0.1,
-        Round = 1
-    })
-    
-    ForwardTPValue = ForwardTP:CreateSlider({
-        Name = "Studs",
-        Function = function(v) end,
-        Min = 1,
-        Max = 50,
-        Default = 5,
-        Round = 0
-    })
-end)
-]]
 
 runFunction(function()
     local highJump = {Enabled = false}
@@ -1287,14 +1025,14 @@ runFunction(function()
         end
     end
 
-    highJump = Tabs.Movement:CreateToggle({
+    local highJumpToggle = Tabs.Movement:CreateToggle({
         Name = "HighJump",
         HoverText = "Makes you jump higher.",
         Callback = function(callback)
             if callback then
                 if mode.Value == "Toggle" then
                     jump()
-                    highJump:Toggle(true)
+                    highJumpToggle:Toggle(true)
                 elseif mode.Value == "Normal" then
                     connection = table.insert(connections, UserInputService.JumpRequest:Connect(function()
                         jump()
@@ -1302,12 +1040,11 @@ runFunction(function()
                 end
             else
                 betterDisconnect(connection)
-                --workspace.Gravity = 196.19999694824
             end
         end
     })
 
-    jumpMode = highJump:CreateDropdown({
+    jumpMode = highJumpToggle:CreateDropdown({
         Name = "JumpMode",
         Function = function(v) 
             if mode.MainObject then
@@ -1318,14 +1055,14 @@ runFunction(function()
         Default = "Velocity"
     })
 
-    mode = highJump:CreateDropdown({
+    mode = highJumpToggle:CreateDropdown({
         Name = "Mode",
         Callback = function(v) end,
         List = {"Toggle", "Normal"},
         Default = "Toggle"
     })
 
-    jumps = highJump:CreateSlider({
+    jumps = highJumpToggle:CreateSlider({
         Name = "Jumps",
         Function = function() end,
         Min = 0,
@@ -1334,7 +1071,7 @@ runFunction(function()
         Round = 0
     })
 
-    height = highJump:CreateSlider({
+    height = highJumpToggle:CreateSlider({
         Name = "Height",
         Function = function() end,
         Min = 0,
@@ -1349,7 +1086,7 @@ runFunction(function()
     local mode = {Value = "Velocity"}
     local power = {Value = 50}
 
-    longJump = Tabs.Movement:CreateToggle({
+    local longJumpToggle = Tabs.Movement:CreateToggle({
         Name = "LongJump",
         HoverText = "Makes you jump forward.",
         Callback = function(callback)
@@ -1383,19 +1120,19 @@ runFunction(function()
                     humanoidRootPart.CFrame = CFrame.new(newCFrame.X, oldCFrame.Y, newCFrame.Z)
                 end
 
-                longJump:Toggle(true)
+                longJumpToggle:Toggle(true)
             end
         end
     })
 
-    mode = longJump:CreateDropdown({
+    mode = longJumpToggle:CreateDropdown({
         Name = "Mode",
         Function = function(v) end,
         List = {"AssemblyAngularVelocity", "AssemblyLinearVelocity", "LinearVelocity", "Velocity", "CFrame"},
         Default = "Velocity"
     })
 
-    power = longJump:CreateSlider({
+    power = longJumpToggle:CreateSlider({
         Name = "Power",
         Function = function(v) end,
         Min = 1,
@@ -1408,7 +1145,7 @@ end)
 runFunction(function()
     local phase = {Enabled = false}
     local parts = {}
-    phase = Tabs.Movement:CreateToggle({
+    local phaseToggle = Tabs.Movement:CreateToggle({
         Name = "Phase",
         HoverText = "Makes you walk through walls.",
         Callback = function(callback) 
@@ -1448,7 +1185,7 @@ runFunction(function()
     local connection
     local connection2
     local holdingShift = false
-    speed = Tabs.Movement:CreateToggle({
+    local speedToggle = Tabs.Movement:CreateToggle({
         Name = "Speed",
         HoverText = "Makes you walk faster.",
         Callback = function(callback)
@@ -1476,21 +1213,6 @@ runFunction(function()
                             humanoid.JumpPower = jumpPower.Value
                             humanoid.UseJumpPower = true
                         end
-
-                        --[[cant make this to work normally + with auto jump
-                        if mode.Value == "AssemblyAngularVelocity" then
-                            humanoidRootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                            humanoidRootPart.AssemblyLinearVelocity = Vector3.new(moveDirection.X * value.Value, 0, moveDirection.Z * value.Value) --* Delta
-                        elseif mode.Value == "AssemblyLinearVelocity" then
-                            humanoidRootPart.AssemblyLinearVelocity = Vector3.new(moveDirection.X * value.Value, 0, moveDirection.Z * value.Value) * Delta
-                        elseif mode.Value == "LinearVelocity" then
-                            linearVelocity = linearVelocity or Instance.new("LinearVelocity", humanoidRootPart)
-                            linearVelocity.VelocityConstraintMode = Enum.VelocityConstraintMode.Line
-                            linearVelocity.Attachment0 = humanoidRootPart:FindFirstChildWhichIsA("Attachment")
-                            linearVelocity.MaxForce = math.huge
-                            linearVelocity.LineDirection = moveDirection
-                            linearVelocity.LineVelocity = (moveDirection.X ~= 0 and moveDirection.Z ~= 0) and speed.Value or 0
-                        else]]
 
                         if mode.Value == "Velocity" then
                             local Velocity = Humanoid.MoveDirection * (value.Value * 5) * Delta
@@ -1530,21 +1252,21 @@ runFunction(function()
         end
     })
 
-    mode = speed:CreateDropdown({
+    mode = speedToggle:CreateDropdown({
         Name = "Mode",
         Function = function(v) 
-            if speed.Enabled then 
-                speed:ReToggle(true)
+            if speedToggle.Enabled then 
+                speedToggle:ReToggle(true)
             end
         end,
-        List = {"Velocity", "CFrame", "Normal"}, -- "AssemblyAngularVelocity", "AssemblyLinearVelocity", "LinearVelocity", "Velocity", "CFrame", "Normal"}
+        List = {"Velocity", "CFrame", "Normal"},
         Default = "Velocity"
     })
 
-    value = speed:CreateSlider({
+    value = speedToggle:CreateSlider({
         Name = "Speed",
         Function = function(v) 
-            if speed.Enabled and mode.Value == "Normal" then
+            if speedToggle.Enabled and mode.Value == "Normal" then
                 getHumanoid(LocalPlayer).WalkSpeed = v
             end
         end,
@@ -1554,7 +1276,7 @@ runFunction(function()
         Round = 0
     })
 
-    autoJumpPower = speed:CreateSlider({
+    autoJumpPower = speedToggle:CreateSlider({
         Name = "AutoJumpPower",
         Function = function(v) end,
         Min = 0,
@@ -1563,10 +1285,10 @@ runFunction(function()
         Round = 0
     })
 
-    jumpPower = speed:CreateSlider({
+    jumpPower = speedToggle:CreateSlider({
         Name = "JumpPower",
         Function = function(v) 
-            if speed.Enabled then
+            if speedToggle.Enabled then
                 getHumanoid(LocalPlayer).JumpPower = v
             end
         end,
@@ -1576,7 +1298,7 @@ runFunction(function()
         Round = 0
     })
 
-    autoJump = speed:CreateToggle({
+    autoJump = speedToggle:CreateToggle({
         Name = "AutoJump",
         Default = false,
         Function = function(v)
@@ -1584,14 +1306,14 @@ runFunction(function()
         end
     })
 
-    jumpMode = speed:CreateDropdown({
+    jumpMode = speedToggle:CreateDropdown({
         Name = "AutoJumpMode",
         Function = function(v) 
             if autoJumpPower.MainObject then
                 autoJumpPower.MainObject.Visible = v == "Velocity"
             end
-            if speed.Enabled then
-                speed:ReToggle(true)
+            if speedToggle.Enabled then
+                speedToggle:ReToggle(true)
             end
         end,
         List = {"Normal", "Velocity"},
@@ -1599,23 +1321,23 @@ runFunction(function()
     })
     jumpMode.Container1.Visible = false
 
-    noAnim = speed:CreateToggle({
+    noAnim = speedToggle:CreateToggle({
         Name = "NoAnimation",
         Default = false,
         Function = function(v)
-            if speed.Enabled then
+            if speedToggle.Enabled then
                 getCharacter(LocalPlayer).Animate.Disabled = v
             end
         end
     })
 
-    shiftHold = speed:CreateToggle({
+    shiftHold = speedToggle:CreateToggle({
         Name = "ShiftHold",
         Default = false,
         Function = function(v)
             holdingShift = false
-            if speed.Enabled then
-                speed:ReToggle(true)
+            if speedToggle.Enabled then
+                speedToggle:ReToggle(true)
             end
         end
     })
@@ -1635,7 +1357,7 @@ runFunction(function()
     local angularY
     local angularZ
     local angularVelocity = Instance.new("AngularVelocity")
-    spinBot = Tabs.Movement:CreateToggle({
+    local spinBotToggle = Tabs.Movement:CreateToggle({
         Name = "SpinBot",
         HoverText = "Makes your character spin.\nDoesn't work in first person.",
         Callback = function(callback)
@@ -1655,12 +1377,6 @@ runFunction(function()
                         humanoid.AutoRotate = false
                         if mode.Value == "RotVelocity" then
                             humanoidRootPart.RotVelocity = Vector3.new(velocityX, velocityY, velocityZ)
-                        --[[
-                        elseif mode.Value == "AngularVelocity" then
-                            angularVelocity.Parent = humanoidRootPart
-                            angularVelocity.MaxTorque = Vector3.new(angularX, angularY, angularZ)
-                            angularVelocity.AngularVelocity = Vector3.new(velocityX, velocityY, velocityZ)
-                        ]]
                         elseif mode.Value == "AssemblyAngularVelocity" then
                             humanoidRootPart.AssemblyAngularVelocity = Vector3.new(velocityX, velocityY, velocityZ)
                         end
@@ -1673,14 +1389,14 @@ runFunction(function()
         end
     })
 
-    mode = spinBot:CreateDropdown({
+    mode = spinBotToggle:CreateDropdown({
         Name = "Mode",
         Function = function(v) end,
-        List = {"RotVelocity", "AssemblyAngularVelocity"}, --"AngularVelocity",
+        List = {"RotVelocity", "AssemblyAngularVelocity"},
         Default = "AssemblyAngularVelocity"
     })
 
-    spinBotSpeed = spinBot:CreateSlider({
+    spinBotSpeed = spinBotToggle:CreateSlider({
         Name = "SpinSpeed",
         Function = function(v) end,
         Min = 1,
@@ -1689,27 +1405,29 @@ runFunction(function()
         Round = 0
     })
 
-    spinBotX = spinBot:CreateToggle({
+    spinBotX = spinBotToggle:CreateToggle({
         Name = "Spin X",
         Default = false,
         Function = function(v) end
     })
 
-    spinBotY = spinBot:CreateToggle({
+    spinBotY = spinBotToggle:CreateToggle({
         Name = "Spin Y",
         Default = false,
         Function = function(v) end
     })
 
-    spinBotZ = spinBot:CreateToggle({
+    spinBotZ = spinBotToggle:CreateToggle({
         Name = "Spin Z",
         Default = false,
         Function = function(v) end
     })
 end)
 
+-- ============================================
+-- RENDER TAB
+-- ============================================
 
--- // Render tab
 runFunction(function()
     local breadcrumbs = {Enabled = false}
     local mode = {Value = "Trail"}
@@ -1726,8 +1444,7 @@ runFunction(function()
 	local attachment
 	local attachment2
     local lastPos
-    --local objects = {}
-    breadcrumbs = Tabs.Render:CreateToggle({
+    local breadcrumbsToggle = Tabs.Render:CreateToggle({
         Name = "Breadcrumbs",
         HoverText = "Creates a trail behind you.",
         Callback = function(callback)
@@ -1803,7 +1520,7 @@ runFunction(function()
                             end
 						end
                         task.wait()
-					until not breadcrumbs.Enabled
+					until not breadcrumbsToggle.Enabled
 				end)
             else
                 if trail then
@@ -1825,7 +1542,7 @@ runFunction(function()
         end
     })
 
-    mode = breadcrumbs:CreateDropdown({
+    mode = breadcrumbsToggle:CreateDropdown({
         Name = "Mode",
         List = {"Trail", "Spheres", "Cubes"},
         Default = "Trail",
@@ -1838,7 +1555,7 @@ runFunction(function()
         end
     })
 
-    startColor = breadcrumbs:CreateColorSlider({
+    startColor = breadcrumbsToggle:CreateColorSlider({
         Name = "Start color",
         Default = Color3.fromRGB(255, 255, 255),
         Function = function(v)
@@ -1848,7 +1565,7 @@ runFunction(function()
         end
     })
 
-    endColor = breadcrumbs:CreateColorSlider({
+    endColor = breadcrumbsToggle:CreateColorSlider({
         Name = "End color",
         Default = Color3.fromRGB(255, 255, 255),
         Function = function(v)
@@ -1858,11 +1575,11 @@ runFunction(function()
         end
     })
 
-    color = breadcrumbs:CreateColorSlider({
+    color = breadcrumbsToggle:CreateColorSlider({
         Name = "Color",
         Default = Color3.fromRGB(255, 255, 255),
         Function = function(v)
-            if breadcrumbs.Enabled then
+            if breadcrumbsToggle.Enabled then
                 for _, obj in next, objects:GetChildren() do
                     obj.Color = v
                 end
@@ -1871,10 +1588,10 @@ runFunction(function()
     })
     color.MainObject.Visible = false
 
-    size = breadcrumbs:CreateSlider({
+    size = breadcrumbsToggle:CreateSlider({
         Name = "Size",
         Function = function(v)
-            if breadcrumbs.Enabled then
+            if breadcrumbsToggle.Enabled then
                 for _, obj in next, objects:GetChildren() do
                     obj.Size = Vector3.new(v, v, v)
                 end
@@ -1887,7 +1604,7 @@ runFunction(function()
     })
     size.MainObject.Visible = false
 
-    distance = breadcrumbs:CreateSlider({
+    distance = breadcrumbsToggle:CreateSlider({
         Name = "Distance",
         Function = function(v) end,
         Min = 0.1,
@@ -1896,7 +1613,7 @@ runFunction(function()
         Round = 1
     })
 
-    lifeTime = breadcrumbs:CreateSlider({
+    lifeTime = breadcrumbsToggle:CreateSlider({
         Name = "LifeTime",
         Function = function(v) end,
         Min = 1,
@@ -1905,10 +1622,10 @@ runFunction(function()
         Round = 0
     })
 
-    transparency = breadcrumbs:CreateSlider({
+    transparency = breadcrumbsToggle:CreateSlider({
         Name = "Transparency",
         Function = function(v)
-            if breadcrumbs.Enabled then
+            if breadcrumbsToggle.Enabled then
                 for _, obj in next, objects:GetChildren() do
                     obj.Transparency = v
                 end
@@ -1923,7 +1640,7 @@ end)
 
 runFunction(function()
     local camFix = {Enabled = false}
-    camFix = Tabs.Render:CreateToggle({
+    local camFixToggle = Tabs.Render:CreateToggle({
         Name = "CameraFix",
         HoverText = "Changes camera zooming.",
         Callback = function(callback) 
@@ -1931,7 +1648,7 @@ runFunction(function()
                 repeat
                     UserSettings():GetService("UserGameSettings").RotationType = ((Camera.CFrame.Position - Camera.Focus.Position).Magnitude <= 0.5 and Enum.RotationType.CameraRelative or Enum.RotationType.MovementRelative)
                     task.wait()
-                until not camFix.Enabled
+                until not camFixToggle.Enabled
             end)
         end
     })
@@ -1941,7 +1658,7 @@ runFunction(function()
     local chinaHat = {Enabled = false}
     local color = {Value = Color3.fromRGB(255, 255, 255)}
     local chinaHatTrail
-    chinaHat = Tabs.Render:CreateToggle({
+    local chinaHatToggle = Tabs.Render:CreateToggle({
         Name = "ChinaHat",
         HoverText = "Puts a china hat on your head.",
         Callback = function(callback)
@@ -1967,7 +1684,7 @@ runFunction(function()
 						end
 						chinaHatTrail.CFrame = head.CFrame * CFrame.new(0, 1.1, 0)
 						chinaHatTrail.Velocity = Vector3.zero
-						chinaHatTrail.LocalTransparencyModifier = head.LocalTransparencyModifier--((Camera.CFrame.Position - Camera.Focus.Position).Magnitude <= 0.6 and 1 or 0)
+						chinaHatTrail.LocalTransparencyModifier = head.LocalTransparencyModifier
 					else
 						if chinaHatTrail then
 							chinaHatTrail:Destroy()
@@ -1985,7 +1702,7 @@ runFunction(function()
         end
     })
 
-    color = chinaHat:CreateColorSlider({
+    color = chinaHatToggle:CreateColorSlider({
         Name = "Color",
         Default = Color3.fromRGB(255, 255, 255),
         Function = function(v)
@@ -1996,11 +1713,10 @@ runFunction(function()
     })
 end)
 
-
 runFunction(function()
     local crossHair = {Enabled = false}
     local id = {Value = ""}
-    crossHair = Tabs.Render:CreateToggle({
+    local crossHairToggle = Tabs.Render:CreateToggle({
         Name = "CustomCrossHair",
         HoverText = "Changes your crosshair.",
         Callback = function(callback)
@@ -2012,7 +1728,7 @@ runFunction(function()
         end
     })
 
-    id = crossHair:CreateTextBox({
+    id = crossHairToggle:CreateTextBox({
         Name = "CrossHairID",
         PlaceholderText = "Asset ID",
         DefaultValue = "",
@@ -2032,8 +1748,6 @@ runFunction(function()
     local outlineTransparency = {Value = 0}
     local color = {Value = Color3.fromRGB(255, 0, 0)}
     local transparency = {Value = 0}
-    --local lineThickness = {Value = 0}
-    --local surfaceTransparency = {Value = 0}
     local useTeamColor = {Value = false}
     local teammates = {Value = false}
     local alwaysOnTop = {Value = true}
@@ -2042,7 +1756,7 @@ runFunction(function()
 
     local espLibrary = espLibrary:create("ESP")
 
-    esp = Tabs.Render:CreateToggle({
+    local espToggle = Tabs.Render:CreateToggle({
         Name = "ESP",
         HoverText = "Shows people through walls.",
         Callback = function(callback)
@@ -2054,41 +1768,36 @@ runFunction(function()
         end
     })
 
-    adorneePart = esp:CreateDropdown({
+    adorneePart = espToggle:CreateDropdown({
         Name = "Attach Part",
         List = {"Head", "HumanoidRootPart", "Full Character"},
         Default = "Full Character",
         Function = function(v)
             espLibrary.adorneePart = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end
     })
 
-    mode = esp:CreateDropdown({
+    mode = espToggle:CreateDropdown({
         Name = "Mode",
-        List = {"BoxHandleAdornment", "Highlight"}, --"SelectionBox", "BoxHandleAdornment", "Highlight"
+        List = {"BoxHandleAdornment", "Highlight"},
         Default = "Highlight",
         Callback = function(v)
             espLibrary.mode = v
-            local modeVisibility = {
-                --SelectionBox = {lineThickness, surfaceTransparency, color, transparency},
-                BoxHandleAdornment = {color, transparency},
-                Highlight = {outline, fill}
-            }
             if color.Container then color.Container.Visible = v == "BoxHandleAdornment" end
             if transparency.Container then transparency.Container.Visible = v == "BoxHandleAdornment" end
             if outline.Container then outline.Container.Visible = v == "Highlight"; outline:ReToggle() end
             if fill.Container then fill.Container.Visible = v == "Highlight"; fill:ReToggle() end
-            if esp.Enabled then
-                esp:ReToggle(true)
+            if espToggle.Enabled then
+                espToggle:ReToggle(true)
                 espLibrary:updateAll()
             end
         end
     })
 
-    outline = esp:CreateToggle({
+    outline = espToggle:CreateToggle({
         Name = "Outline",
         Default = false,
         Function = function(v)
@@ -2098,23 +1807,23 @@ runFunction(function()
         end
     })
 
-    outlineColor = esp:CreateColorSlider({
+    outlineColor = espToggle:CreateColorSlider({
         Name = "Outline color",
         Default = Color3.fromRGB(255, 0, 0),
         Function = function(v)
             espLibrary.outlineColor = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end
     })
     outlineColor.Container.Visible = false
 
-    outlineTransparency = esp:CreateSlider({
+    outlineTransparency = espToggle:CreateSlider({
         Name = "Outline Transparency",
         Function = function(v)
             espLibrary.outlineTransparency = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end,
@@ -2125,7 +1834,7 @@ runFunction(function()
     })
     outlineTransparency.Container.Visible = false
 
-    fill = esp:CreateToggle({
+    fill = espToggle:CreateToggle({
         Name = "Fill",
         Default = false,
         Function = function(v)
@@ -2135,23 +1844,23 @@ runFunction(function()
         end
     })
 
-    fillColor = esp:CreateColorSlider({
+    fillColor = espToggle:CreateColorSlider({
         Name = "Fill color",
         Default = Color3.fromRGB(255, 0, 0),
         Function = function(v)
             espLibrary.fillColor = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end
     })
     fillColor.Container.Visible = false
 
-    fillTransparency = esp:CreateSlider({
+    fillTransparency = espToggle:CreateSlider({
         Name = "Fill Transparency",
         Function = function(v)
             espLibrary.fillTransparency = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end,
@@ -2162,23 +1871,23 @@ runFunction(function()
     })
     fillTransparency.Container.Visible = false
 
-    color = esp:CreateColorSlider({
+    color = espToggle:CreateColorSlider({
         Name = "Color",
         Default = Color3.fromRGB(255, 0, 0),
         Function = function(v)
             espLibrary.color = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end
     })
     color.Container.Visible = false
 
-    transparency = esp:CreateSlider({
+    transparency = espToggle:CreateSlider({
         Name = "Transparency",
         Function = function(v)
             espLibrary.transparency = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end,
@@ -2189,37 +1898,7 @@ runFunction(function()
     })
     transparency.Container.Visible = false
 
-    --[[
-    lineThickness = esp:CreateSlider({
-        Name = "Line Thickness",
-        Function = function(v)
-            espLibrary.lineThickness = v
-            if esp.Enabled then
-                espLibrary:updateAll()
-            end
-        end,
-        Min = 0,
-        Max = 1,
-        Default = 0,
-        Round = 1
-    })
-
-    surfaceTransparency = esp:CreateSlider({
-        Name = "Surface Transparency",
-        Function = function(v)
-            espLibrary.surfaceTransparency = v
-            if esp.Enabled then
-                espLibrary:updateAll()
-            end
-        end,
-        Min = 0,
-        Max = 10,
-        Default = 1,
-        Round = 1
-    })
-    ]]
-
-    alwaysOnTop = esp:CreateToggle({
+    alwaysOnTop = espToggle:CreateToggle({
         Name = "AlwaysOnTop",
         Default = true,
         Function = function(v)
@@ -2231,23 +1910,23 @@ runFunction(function()
         end
     })
 
-    useTeamColor = esp:CreateToggle({
+    useTeamColor = espToggle:CreateToggle({
         Name = "TeamColor",
         Default = false,
         Function = function(v)
             espLibrary.useTeamColor = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end
     })
 
-    teammates = esp:CreateToggle({
+    teammates = espToggle:CreateToggle({
         Name = "Teammates",
         Default = false,
         Function = function(v)
             espLibrary.teammates = v
-            if esp.Enabled then
+            if espToggle.Enabled then
                 espLibrary:updateAll()
             end
         end
@@ -2258,7 +1937,7 @@ runFunction(function()
     local fovChanger = {Enabled = false}
     local fov = {Value = 80}
     local oldfov
-    fovChanger = Tabs.Render:CreateToggle({
+    local fovChangerToggle = Tabs.Render:CreateToggle({
         Name = "FOVChanger",
         HoverText = "Changes your field of view.",
         Callback = function(callback)
@@ -2271,7 +1950,7 @@ runFunction(function()
         end
     })
     
-    fov = fovChanger:CreateSlider({
+    fov = fovChangerToggle:CreateSlider({
         Name = "FOV",
         Function = function(v) end,
         Min = 1,
@@ -2286,7 +1965,7 @@ runFunction(function()
     local params = {}
 	local changed = false
     local connection
-    fullbright = Tabs.Render:CreateToggle({
+    local fullbrightToggle = Tabs.Render:CreateToggle({
         Name = "Fullbright",
         HoverText = "Makes everything brigher.",
         Callback = function(callback)
@@ -2342,7 +2021,7 @@ runFunction(function()
     local textXAllignment = {Value = "Left"}
     local textYAllignment = {Value = "Top"}
 
-    keyStrokes = Tabs.Render:CreateToggle({
+    local keyStrokesToggle = Tabs.Render:CreateToggle({
         Name = "KeyStrokes",
         HoverText = "Creates ui with keys and shows which ones you held.",
         Callback = function(callback)
@@ -2350,7 +2029,7 @@ runFunction(function()
         end
     })
 
-    mode = keyStrokes:CreateDropdown({
+    mode = keyStrokesToggle:CreateDropdown({
         Name = "Mode",
         Function = function(v) 
             Mana.KeyStrokes:changeSymbols(v)
@@ -2359,7 +2038,7 @@ runFunction(function()
         Default = "Letters"
     })
 
-    textSize = keyStrokes:CreateSlider({
+    textSize = keyStrokesToggle:CreateSlider({
         Name = "Text Size",
         Function = function(v) 
             Mana.KeyStrokes:updateTextSize(v)
@@ -2370,7 +2049,7 @@ runFunction(function()
         Round = 0
     })
 
-    spaceTextSize = keyStrokes:CreateSlider({
+    spaceTextSize = keyStrokesToggle:CreateSlider({
         Name = "Space Text Size",
         Function = function(v) 
             Mana.KeyStrokes:updateSpaceTextSize(v)
@@ -2381,7 +2060,7 @@ runFunction(function()
         Round = 0
     })
 
-    size = keyStrokes:CreateSlider({
+    size = keyStrokesToggle:CreateSlider({
         Name = "Size",
         Function = function(v) 
             Mana.KeyStrokes:updateSize(v)
@@ -2392,7 +2071,7 @@ runFunction(function()
         Round = 2
     })
 
-    transparency = keyStrokes:CreateSlider({
+    transparency = keyStrokesToggle:CreateSlider({
         Name = "Transparency",
         Function = function(v) 
             Mana.KeyStrokes:updateBackgroundTransparency(v)
@@ -2403,7 +2082,7 @@ runFunction(function()
         Round = 1
     })
 
-    showMouseButtons = keyStrokes:CreateToggle({
+    showMouseButtons = keyStrokesToggle:CreateToggle({
         Name = "Mouse Buttons",
         Default = false,
         Function = function(v) 
@@ -2411,7 +2090,7 @@ runFunction(function()
         end
     })
 
-    textXAllignment = keyStrokes:CreateDropdown({
+    textXAllignment = keyStrokesToggle:CreateDropdown({
         Name = "Text X Pos",
         Function = function(v) 
             Mana.KeyStrokes:updateTextPosition(v, textYAllignment.Value)
@@ -2420,7 +2099,7 @@ runFunction(function()
         Default = "Left"
     })
 
-    textYAllignment = keyStrokes:CreateDropdown({
+    textYAllignment = keyStrokesToggle:CreateDropdown({
         Name = "Text Y Pos",
         Function = function(v) 
             Mana.KeyStrokes:updateTextPosition(textXAllignment.Value, v)
@@ -2430,7 +2109,6 @@ runFunction(function()
     })
 end)
 
--- Made by Wowzers
 runFunction(function()
     local nameTags = {Enabled = false}
     local mode = {Value = "Username"}
@@ -2440,11 +2118,10 @@ runFunction(function()
     local showDistance = {Value = false}
     local maxDistance = {Value = 1000}
     local billboardGuis = {}
-    local connections = {}
+    local nameTagConnections = {}
     local nameTagsFolder = Instance.new("Folder")
     nameTagsFolder.Name = "NameTagsFolder"
     nameTagsFolder.Parent = CoreGui or workspace
-    local connections = {}
     local lastFullUpdate
 
     for _, existing in pairs(CoreGui:GetChildren()) do
@@ -2522,16 +2199,15 @@ runFunction(function()
         local parts = {}
 
         table.insert(parts, string.format("<font color=\"rgb(%d, %d, %d)\">%s</font>",
-            color.RawColorTable.R,
-            color.RawColorTable.G,
-            color.RawColorTable.B,
+            color.Value.R * 255,
+            color.Value.G * 255,
+            color.Value.B * 255,
         nameText))
 
         if showHP.Value then
             local health = math.floor(humanoid.Health)
             local maxHealth = math.floor(humanoid.MaxHealth)
             local healthColor = ConvertHealthToColor(health, maxHealth)
-            local color = teamColor and plr.Team and plr.TeamColor or color.Value
 
             table.insert(parts, string.format(" <font color=\"rgb(%d,%d,%d)\">%d HP</font>", 
                 math.floor(healthColor.R * 255), 
@@ -2577,12 +2253,12 @@ runFunction(function()
         end
     end
 
-    nameTags = Tabs.Render:CreateToggle({
+    local nameTagsToggle = Tabs.Render:CreateToggle({
         Name = "NameTags",
         HoverText = "Adds nametag above every player.",
         Callback = function(callback)
             if callback then
-                table.insert(connections, Players.PlayerRemoving:Connect(function(plr) -- note: here connections is a new table, not accross this whole script
+                table.insert(nameTagConnections, Players.PlayerRemoving:Connect(function(plr)
                     CleanupPlayerNameTag(plr)
                 end))
                 lastFullUpdate = 0
@@ -2594,7 +2270,7 @@ runFunction(function()
                             if plr ~= LocalPlayer then
                                 if isAlive(plr) and (not billboardGuis[plr.Name] or not billboardGuis[plr.Name].Parent) then
                                     CreateNameTag(plr)
-                                    table.insert(connections, plr.CharacterRemoving:Connect(function()
+                                    table.insert(nameTagConnections, plr.CharacterRemoving:Connect(function()
                                         CleanupPlayerNameTag(plr)
                                     end))
                                 elseif (not isAlive(plr)) and billboardGuis[plr.Name] then
@@ -2613,7 +2289,7 @@ runFunction(function()
                 end)
             else
                 RunLoops:UnbindFromRenderStep("NameTags")
-                for _, connection in next, connections do
+                for _, connection in next, nameTagConnections do
                     betterDisconnect(connection)
                 end
                 CleanupAllNameTags()
@@ -2621,65 +2297,65 @@ runFunction(function()
         end
     })
 
-    mode = nameTags:CreateDropdown({
+    mode = nameTagsToggle:CreateDropdown({
         Name = "Name Mode",
         List = {"Username", "DisplayName"},
         Default = "Username",
         Function = function(v)
-            if nameTags.Enabled then
+            if nameTagsToggle.Enabled then
                 UpdateAllNameTags()
             end
         end
     })
 
-    color = nameTags:CreateColorSlider({
+    color = nameTagsToggle:CreateColorSlider({
         Name = "Name Color",
         Default = Color3.fromRGB(255, 255, 255),
         Function = function(v)
-            if nameTags.Enabled then
+            if nameTagsToggle.Enabled then
                 UpdateAllNameTags()
             end
         end
     })
 
-    teamColor = nameTags:CreateToggle({
+    teamColor = nameTagsToggle:CreateToggle({
         Name = "Team Color",
         Default = false,
         Function = function(v)
-            if nameTags.Enabled then
+            if nameTagsToggle.Enabled then
                 UpdateAllNameTags()
             end
         end
     })
 
-    showHP = nameTags:CreateToggle({
+    showHP = nameTagsToggle:CreateToggle({
         Name = "Health",
         Default = false,
         Function = function(v)
-            if nameTags.Enabled then
+            if nameTagsToggle.Enabled then
                 UpdateAllNameTags()
             end
         end
     })
 
-    showDistance = nameTags:CreateToggle({
+    showDistance = nameTagsToggle:CreateToggle({
         Name = "Distance",
         Default = false,
         Function = function(v)
-            if nameTags.Enabled then
+            if nameTagsToggle.Enabled then
                 UpdateAllNameTags()
             end
         end
     })
 
-    maxDistance = nameTags:CreateSlider({
+    maxDistance = nameTagsToggle:CreateSlider({
         Name = "Max Distance",
         Min = 100,
         Max = 10000,
         Default = 1000,
         Round = 0,
         Function = function(v)
-            if nameTags.Enabled then
+            if nameTagsToggle.Enabled then
                 UpdateAllNameTags()
             end
         end
@@ -2694,7 +2370,7 @@ runFunction(function()
     local delay = {Value = 0.1}
     local newColor
 
-    rainbowSkin = Tabs.Render:CreateToggle({
+    local rainbowSkinToggle = Tabs.Render:CreateToggle({
         Name = "RainbowSkin",
         HoverText = "Makes your skin rainbow/random color.",
         Callback = function(callback)
@@ -2709,18 +2385,18 @@ runFunction(function()
                     end
                 end
                 wait(delay.Value)
-            until not rainbowSkin.Enabled
+            until not rainbowSkinToggle.Enabled
         end
     })
 
-    mode = rainbowSkin:CreateDropdown({
+    mode = rainbowSkinToggle:CreateDropdown({
         Name = "Mode",
         List = {"FullCharacter", "PerPart"},
         Default = "PerPart",
         Function = function(v) end
     })
 
-    colorMode = rainbowSkin:CreateDropdown({
+    colorMode = rainbowSkinToggle:CreateDropdown({
         Name = "ColorMode",
         List = {"Random", "Custom"},
         Default = "Random",
@@ -2731,13 +2407,13 @@ runFunction(function()
         end
     })
 
-    color = rainbowSkin:CreateColorSlider({
+    color = rainbowSkinToggle:CreateColorSlider({
         Name = "Color",
         Default = Color3.fromRGB(255, 255, 255),
         Function = function(v) end
     })
 
-    delay = rainbowSkin:CreateSlider({
+    delay = rainbowSkinToggle:CreateSlider({
         Name = "Delay",
         Function = function(v) end,
         Min = 0.1,
@@ -2747,76 +2423,13 @@ runFunction(function()
     })
 end)
 
---[[
-runFunction(function()
-    --6018555426
-    local santaHat = {Enabled = false}
-    local color = {Value = Color3.fromRGB(255, 255, 255)}
-    local hat
-    santaHat = Tabs.Render:CreateToggle({
-        Name = "SantaHat",
-        HoverText = "Puts a china hat on your head.",
-        Callback = function(callback)
-            if callback then
-                RunLoops:BindToHeartbeat("santaHat", function()
-					if isAlive() then
-                        local head = getHead(LocalPlayer)
-						if hat == nil or hat.Parent == nil then
-							hat = Instance.new("Part")
-							hat.CFrame = head.CFrame * CFrame.new(0, 1.1, 0)
-							hat.Size = Vector3.new(3, 0.7, 3)
-							hat.Name = "santaHat"
-							hat.Material = Enum.Material.Neon
-							hat.CanCollide = false
-							hat.Transparency = 0.3
-                            hat.Color = color.Value
-                            hat.Parent = Camera
-							local mesh = Instance.new("SpecialMesh")
-							mesh.Parent = hat
-							mesh.MeshType = "FileMesh"
-							mesh.MeshId = "http://www.roblox.com/asset/?id=15854272807" --15854272807 rbxassetid://15854272807
-							mesh.Scale = Vector3.new(3, 0.6, 3)
-						end
-						hat.CFrame = head.CFrame * CFrame.new(0, 1.1, 0)
-						hat.Velocity = Vector3.zero
-						hat.LocalTransparencyModifier = head.LocalTransparencyModifier--((Camera.CFrame.Position - Camera.Focus.Position).Magnitude <= 0.6 and 1 or 0)
-					else
-						if hat then
-							hat:Destroy()
-							hat = nil
-						end
-					end
-				end)
-            else
-                RunLoops:UnbindFromHeartbeat("santaHat")
-				if hat then
-					hat:Destroy()
-					hat = nil
-				end
-            end
-        end
-    })
-
-    color = santaHat:CreateColorSlider({
-        Name = "Color",
-        Default = Color3.fromRGB(255, 255, 255),
-        Function = function(v)
-            if hat then
-                hat.Color = v
-            end
-        end
-    })
-end)
-]]
-
--- // first time in life using number range :omg:
 runFunction(function()
     local snowing = {Enabled = false}
     local speed = {Value = 15}
     local rate = {Value = 1000}
     local part, effect, connection
 
-    snowing = Tabs.Render:CreateToggle({
+    local snowingToggle = Tabs.Render:CreateToggle({
         Name = "Snowing",
         HoverText = "Makes it snow in game.",
         Callback = function(callback)
@@ -2851,7 +2464,7 @@ runFunction(function()
         end
     })
 
-    speed = snowing:CreateSlider({
+    speed = snowingToggle:CreateSlider({
         Name = "Speed",
         Min = 1,
         Max = 50,
@@ -2859,7 +2472,7 @@ runFunction(function()
         Round = 0
     })
 
-    rate = snowing:CreateSlider({
+    rate = snowingToggle:CreateSlider({
         Name = "Rate",
         Min = 500,
         Max = 2000,
@@ -2877,7 +2490,7 @@ runFunction(function()
     local current, max = 1, 1
     local currentID
 
-    soundPlayer = Tabs.Render:CreateToggle({
+    local soundPlayerToggle = Tabs.Render:CreateToggle({
         Name = "SoundPlayer",
         HoverText = "Plays music.",
         Callback = function(callback)
@@ -2906,8 +2519,8 @@ runFunction(function()
 
                     sound.Ended:Wait()
                 end
-            until not soundPlayer.Enabled
-            if not soundPlayer.Enabled and sound then
+            until not soundPlayerToggle.Enabled
+            if not soundPlayerToggle.Enabled and sound then
                 sound:Stop()
                 sound:Destroy()
                 sound = nil
@@ -2915,14 +2528,14 @@ runFunction(function()
         end
     })
 
-    mode = soundPlayer:CreateDropdown({
+    mode = soundPlayerToggle:CreateDropdown({
         Name = "Mode",
         List = {"Random", "Order"},
         Default = "Random",
         Function = function(v) end
     })
 
-    sounds = soundPlayer:CreateTextList({
+    sounds = soundPlayerToggle:CreateTextList({
         Name = "Sounds",
         PlaceholderText = "sound id",
         List = {},
@@ -2930,7 +2543,7 @@ runFunction(function()
         Function = function(v) end
     })
 
-    volume = soundPlayer:CreateSlider({
+    volume = soundPlayerToggle:CreateSlider({
         Name = "Volume",
         Function = function(v)
             if sound then
@@ -2969,7 +2582,7 @@ runFunction(function()
         table.insert(objects, highlight)
     end
 
-    spawnEsp = Tabs.Render:CreateToggle({
+    local spawnEspToggle = Tabs.Render:CreateToggle({
         Name = "SpawnESP",
         HoverText = "Highlights every spawn that has 0 transparency.",
         Callback = function(callback)
@@ -2999,7 +2612,7 @@ runFunction(function()
         end
     })
 
-    outline = spawnEsp:CreateToggle({
+    outline = spawnEspToggle:CreateToggle({
         Name = "Outline",
         Default = true,
         Function = function(v)
@@ -3017,7 +2630,7 @@ runFunction(function()
         end
     })
 
-    outlineColor = spawnEsp:CreateColorSlider({
+    outlineColor = spawnEspToggle:CreateColorSlider({
         Name = "Outline color",
         Default = Color3.fromRGB(255, 0, 0),
         Function = function(v)
@@ -3030,7 +2643,7 @@ runFunction(function()
     })
     outlineColor.Container.Visible = false
 
-    outlineTransparency = spawnEsp:CreateSlider({
+    outlineTransparency = spawnEspToggle:CreateSlider({
         Name = "Outline Transparency",
         Function = function(v)
             for _, obj in pairs(objects) do
@@ -3046,7 +2659,7 @@ runFunction(function()
     })
     outlineTransparency.Container.Visible = false
 
-    fill = spawnEsp:CreateToggle({
+    fill = spawnEspToggle:CreateToggle({
         Name = "Fill",
         Default = false,
         Function = function(v)
@@ -3064,7 +2677,7 @@ runFunction(function()
         end
     })
 
-    fillColor = spawnEsp:CreateColorSlider({
+    fillColor = spawnEspToggle:CreateColorSlider({
         Name = "Fill color",
         Default = Color3.fromRGB(255, 0, 0),
         Function = function(v)
@@ -3077,7 +2690,7 @@ runFunction(function()
     })
     fillColor.Container.Visible = false
 
-    fillTransparency = spawnEsp:CreateSlider({
+    fillTransparency = spawnEspToggle:CreateSlider({
         Name = "Fill Transparency",
         Function = function(v)
             for _, obj in pairs(objects) do
@@ -3099,7 +2712,7 @@ runFunction(function()
     local mode = {Value = "DisplayName"}
     local customName = {Value = ""}
     local changedObjects = {}
-    local connections = {} -- // note: this is a new connections table, not the one that is across this whole script
+    local usernameHiderConnections = {}
     local function hide(obj)
         if obj.Text:find(localPlayer.Name) then
             local originalText = obj.Text
@@ -3107,7 +2720,7 @@ runFunction(function()
             changedObjects[obj] = originalText
         end
     end
-    usernameHider = Tabs.Render:CreateToggle({
+    local usernameHiderToggle = Tabs.Render:CreateToggle({
         Name = "UsernameHider",
         HoverText = "Hides your username and if choosed then display name too.\nNote that this is client sided.",
         Callback = function(callback)
@@ -3115,7 +2728,7 @@ runFunction(function()
                 for _, obj in next, CoreGui:GetDescendants() do
                     if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
                         hide(obj)
-                        table.insert(connections, obj:GetPropertyChangedSignal("Text"):Connect(function()
+                        table.insert(usernameHiderConnections, obj:GetPropertyChangedSignal("Text"):Connect(function()
                             hide(obj)
                         end))
                     end
@@ -3123,27 +2736,27 @@ runFunction(function()
                 for _, obj in next, PlayerGui:GetDescendants() do
                     if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
                         hide(obj)
-                        table.insert(connections, obj:GetPropertyChangedSignal("Text"):Connect(function()
+                        table.insert(usernameHiderConnections, obj:GetPropertyChangedSignal("Text"):Connect(function()
                             hide(obj)
                         end))
                     end
                 end
-                table.insert(connections, game.DescendantAdded:Connect(function(obj)
+                table.insert(usernameHiderConnections, game.DescendantAdded:Connect(function(obj)
                     if obj:IsA("TextLabel") or obj:IsA("TextButton") or obj:IsA("TextBox") then
                         hide(obj)
-                        table.insert(connections, obj:GetPropertyChangedSignal("Text"):Connect(function()
+                        table.insert(usernameHiderConnections, obj:GetPropertyChangedSignal("Text"):Connect(function()
                             hide(obj)
                         end))
                     end
                 end))
-                table.insert(connections, TextChatService.MessageReceived:Connect(function(msg)
+                table.insert(usernameHiderConnections, TextChatService.MessageReceived:Connect(function(msg)
                     hide(msg)
                 end))
             else
-                for _, connection in next, connections do
+                for _, connection in next, usernameHiderConnections do
                     betterDisconnect(connection)
                 end
-                connections = {}
+                usernameHiderConnections = {}
                 for obj, originalText in pairs(changedObjects) do
                     if obj and obj.Parent then
                         obj.Text = originalText
@@ -3154,25 +2767,25 @@ runFunction(function()
         end
     })
 
-    mode = usernameHider:CreateDropdown({
+    mode = usernameHiderToggle:CreateDropdown({
         Name = "Change to",
         List = {"DisplayName", "Custom"},
         Default = "DisplayName",
         Function = function(v)
             if customName.Container then customName.Container.Visible = v == "Custom" end
-            if usernameHider.Enabled then
-                usernameHider:Toggle(true)
-                usernameHider:Toggle(true)
+            if usernameHiderToggle.Enabled then
+                usernameHiderToggle:Toggle(true)
+                usernameHiderToggle:Toggle(true)
             end
         end
     })
 
-    customName = usernameHider:CreateTextBox({
+    customName = usernameHiderToggle:CreateTextBox({
         Name = "Custom Name",
         PlaceholderText = "Custom name",
         Default = "",
         Function = function(v)
-            if usernameHider.Enabled then
+            if usernameHiderToggle.Enabled then
                 for obj, _ in pairs(changedObjects) do
                     hide(obj)
                 end
@@ -3184,7 +2797,7 @@ end)
 
 runFunction(function()
     local viewClip = {Enabled = false}
-    viewClip = Tabs.Render:CreateToggle({
+    local viewClipToggle = Tabs.Render:CreateToggle({
         Name = "ViewClip",
         HoverText = "Makes your camera go through objects.",
         Callback = function(callback)
@@ -3193,12 +2806,15 @@ runFunction(function()
     })
 end)
 
--- // Utility tab
+-- ============================================
+-- UTILITY TAB
+-- ============================================
+
 runFunction(function()
     local antiAFK = {Enabled = false}
     local mode = {Value = "AutoClick"}
     local connection
-    antiAFK = Tabs.Utility:CreateToggle({
+    local antiAFKToggle = Tabs.Utility:CreateToggle({
         Name = "AntiAFK",
         HoverText = "Makes you able to idle for inf amount of time,\nAutoClick clicks when you idle.\nDisableConnections disables connections and requires getconnections function.",
         Callback = function(callback) 
@@ -3216,7 +2832,7 @@ runFunction(function()
                         end
                     else
                         GuiLibrary:CreateNotification("AntiAFK", "Missing getconnections function.", 10, "Error")
-                        antiAFK:Toggle(true)
+                        antiAFKToggle:Toggle(true)
                     end
                 end
             else
@@ -3229,7 +2845,7 @@ runFunction(function()
         end
     })
 
-    mode = antiAFK:CreateDropdown({
+    mode = antiAFKToggle:CreateDropdown({
         Name = "Mode",
         List = {"AutoClick", "DisableConnections"},
         Default = "AutoClick",
@@ -3239,7 +2855,7 @@ end)
 
 runFunction(function()
     local antiFling = {Enabled = false}
-    antiFling = Tabs.Utility:CreateToggle({
+    local antiFlingToggle = Tabs.Utility:CreateToggle({
         Name = "AntiFling",
         HoverText = "Makes people unable to push/fling you.\nDisables collision.",
         Callback = function(callback) 
@@ -3263,129 +2879,11 @@ runFunction(function()
     })
 end)
 
-
---[[patched but i don't want to remove it
-runFunction(function()
-    local AutoReportNotifications = {Value = true}
-
-    local ReportTable = {
-        ez = "Bullying",
-        gay = "Bullying",
-        gae = "Bullying",
-        hacks = "Scamming",
-        hacker = "Scamming",
-        hack = "Scamming",
-        cheat = "Scamming",
-        hecker = "Scamming",
-        get = "Scamming",
-        ["get a life"] = "Bullying",
-        L = "Bullying",
-        thuck = "Swearing",
-        thuc = "Swearing",
-        thuk = "Swearing",
-        fatherless = "Bullying",
-        yt = "Offsite Links",
-        discord = "Offsite Links",
-        dizcourde = "Offsite Links",
-        retard = "Swearing",
-        tiktok = "Offsite Links",
-        bad = "Bullying",
-        trash = "Bullying",
-        die = "Bullying",
-        lobby = "Bullying",
-        ban = "Bullying",
-        youtube = "Offsite Links",
-        ["im hacking"] = "Cheating/Exploiting",
-        ["I'm hacking"] = "Cheating/Exploiting",
-        download = "Offsite Links",
-        ["kill your"] = "Bullying",
-        kys = "Bullying",
-        ["hack to win"] = "Bullying",
-        bozo = "Bullying",
-        kid = "Bullying",
-        adopted = "Bullying",
-        vxpe = "Cheating/Exploiting",
-        futureclient = "Cheating/Exploiting",
-        nova6 = "Cheating/Exploiting",
-        [".gg"] = "Offsite Links",
-        gg = "Offsite Links",
-        lol = "Bullying",
-        suck = "Dating",
-        love = "Dating",
-        fuck = "Swearing",
-        sthu = "Swearing",
-        ["i hack"] = "Cheating/Exploiting",
-        disco = "Offsite Links",
-        dc = "Offsite Links",
-        toxic = "Bullying",
-        loser = "Bullying",
-        noob = "Bullying",
-        ["you suck"] = "Bullying",
-        ["you're bad"] = "Bullying",
-        ["your mom"] = "Bullying"
-    }
-
-    local function GetReport(Message)
-        for word, reportType in pairs(ReportTable) do 
-            if Message:lower():find(word) then 
-                return reportType
-            end
-        end
-        return nil
-    end
-
-    local AutoReport = Tabs.Utility:CreateToggle({
-        Name = "AutoReport",
-        Keybind = nil,
-        Callback = function(Callback)
-            if Callback then
-                if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then 
-                    TextChatService.MessageReceived:Connect(function(MessageData)
-                        if MessageData.TextSource then
-                            local Player = Players:GetPlayerByUserId(MessageData.TextSource.UserId)
-                            if Player and Player ~= LocalPlayer then
-                                local ReportFound = GetReport(MessageData.Text)
-                                if ReportFound then
-                                    Players:ReportAbuse(Player, ReportFound, "he said a bad word.")
-                                    if AutoReportNotifications.Value then
-                                        GuiLibrary:CreateNotification("AutoReport", "Reported: " .. Player.Name .. "\nFor: " .. MessageData.Text, 10, false, "warn")
-                                    end
-                                end
-                            end
-                        end
-                    end)
-                else
-                    for _, Player in pairs(Players:GetPlayers()) do
-                        if Player.Name ~= LocalPlayer.Name then
-                            Player.Chatted:connect(function(Message)
-                                local ReportFound = GetReport(Message)
-                                if ReportFound then
-                                    Players:ReportAbuse(Player, ReportFound, "he said a bad word.")
-                                    if AutoReportNotifications.Value then
-                                        GuiLibrary:CreateNotification("AutoReport", "Reported: " .. Player.Name .. "\nFor: " .. Message, 10, false, "warn")
-                                    end
-                                end
-                            end)
-                        end
-                    end
-                end
-            end
-        end
-    })
-
-    AutoReportNotifications = AutoReport:CreateToggle({
-        Name = "Notifications",
-        Default = true,
-        Function = function() end
-    })
-end)
-]]
-
 runFunction(function()
     local antiKick = {Enabled = false}
 	local first = false
     local oldNameCall
-    antiKick = Tabs.Utility:CreateToggle({
+    local antiKickToggle = Tabs.Utility:CreateToggle({
         Name = "AntiKick",
         HoverText = "Removes client sided kicks.\nRequires hookmetamethod function.",
         Callback = function(callback) 
@@ -3406,93 +2904,25 @@ runFunction(function()
                     end
                 else
                     GuiLibrary:CreateNotification("AntiKick", "Missing hookmetamethod function.", 10, "Error")
-                    antiKick:Toggle(true)
+                    antiKickToggle:Toggle(true)
                     return
                 end
             end
         end
     })
 end)
-
---[[doesn't work, 2 days of work in nothing :sob:
-runFunction(function()
-    local Mode = {Value = "Toggle"}
-    local Radius = {Value = 10}
-    local Delay = {Value = 1}
-    local AutoClickDetector = Tabs.Utility:CreateToggle({
-        Name = "AutoClickDetector",
-        Keybind = nil,
-        Callback = function(callback) 
-            if callback then 
-                if fireclickdetector then
-                    if Mode.Value == "Toggle" then
-                        RunLoops:BindToHeartbeat("AutoClickDetector", function(Delta)
-                            local NearClickDetectors = GetNearInstances(Radius.Value, LocalPlayer, "ClickDetector")
-
-                            if NearClickDetectors and NearClickDetectors[1] then
-                                for _, ClickDetector in pairs(NearClickDetectors) do
-                                    fireclickdetector(ClickDetector)
-                                end
-                            end
-                        end)
-                    elseif Mode.Value == "Button" then
-                        local NearClickDetectors = GetNearInstances()
-
-                        if NearClickDetectors and NearClickDetectors[1] then
-                            for _, ClickDetector in pairs(NearClickDetectors) do
-                                fireclickdetector(ClickDetector)
-                            end
-                        end
-                    end
-                else
-                    GuiLibrary:CreateNotification("AutoClickDetector", "Missing fireclickdetector function.", 10, false)
-                    AntiKick:Toggle(true)
-                    return
-                end
-            else
-                RunLoops:UnbindFromHeartbeat("AutoClickDetector")
-            end
-        end
-    })
-
-    local Mode = AutoClickDetector:CreateDropdown({
-        Name = "Mode",
-        List = {"Toggle", "Button"},
-        Default = "Toggle",
-        Callback = function(v) end
-    })
-
-    local Delay = AutoClickDetector:CreateSlider({
-        Name = "Delay (seconds)",
-        Function = function(v) end,
-        Min = 0,
-        Max = 5,
-        Default = 0.1,
-        Round = 1
-    })
-
-    local Radius = AutoClickDetector:CreateSlider({
-        Name = "Radius (studs)",
-        Function = function(v) end,
-        Min = 0,
-        Max = 500,
-        Default = 10,
-        Round = 0
-    })
-end)
-]]
 
 runFunction(function()
     local autoRejoin = {Enabled = false}
     local delay = {Value = 5}
     local sameServer = {Value = false}
-    autoRejoin = Tabs.Utility:CreateToggle({
+    local autoRejoinToggle = Tabs.Utility:CreateToggle({
         Name = "AutoRejoin",
         HoverText = "Automatically rejoins when you get kicked for idling.",
         Callback = function(callback) 
             if callback then 
-                repeat wait(delay.Value) until autoRejoin.Enabled == false or #CoreGui.RobloxPromptGui.promptOverlay:GetChildren() ~= 0
-                if autoRejoin.Enabled and sameServer then 
+                repeat wait(delay.Value) until autoRejoinToggle.Enabled == false or #CoreGui.RobloxPromptGui.promptOverlay:GetChildren() ~= 0
+                if autoRejoinToggle.Enabled and sameServer then 
                     if #Players:GetPlayers() <= 1 then
                         localPlayer:Kick("\nRejoining...")
                         task.wait()
@@ -3511,7 +2941,7 @@ runFunction(function()
         end
     })
 
-    delay = autoRejoin:CreateSlider({
+    delay = autoRejoinToggle:CreateSlider({
         Name = "Delay",
         Function = function(v) end,
         Min = 0,
@@ -3520,7 +2950,7 @@ runFunction(function()
         Round = 0
     })
 
-    sameServer = autoRejoin:CreateToggle({
+    sameServer = autoRejoinToggle:CreateToggle({
         Name = "SameServer",
         Default = true,
         Function = function() end
@@ -3530,7 +2960,7 @@ end)
 runFunction(function()
     local cameraUnlock = {Enabled = false}
     local oldZoomDistance
-    cameraUnlock = Tabs.Utility:CreateToggle({
+    local cameraUnlockToggle = Tabs.Utility:CreateToggle({
         Name = "CameraUnlock",
         HoverText = "Makes you able to zoom out your camera very far.",
         Callback = function(callback)
@@ -3544,7 +2974,6 @@ runFunction(function()
     })
 end)
 
--- roblox removed old chat, rip
 runFunction(function()
     local chatSpammer = {Enabled = false}
     local mode = {Value = "Random"}
@@ -3552,7 +2981,7 @@ runFunction(function()
     local delay = {Value = 1}
     local hideFloodMessage = {Value = false}
     local connection, max, current = nil, 0, 1
-    chatSpammer = Tabs.Utility:CreateToggle({
+    local chatSpammerToggle = Tabs.Utility:CreateToggle({
         Name = "ChatSpammer",
         HoverText = "Automatically sends messages in chat.",
         Callback = function(callback) 
@@ -3583,7 +3012,7 @@ runFunction(function()
                         end
                         TextChatService.ChatInputBarConfiguration.TargetTextChannel:SendAsync(msg)
                         wait(delay.Value)
-                    until not chatSpammer.Enabled
+                    until not chatSpammerToggle.Enabled
                 end
                 if hideFloodMessage.Value then
                     local ExperienceChat = CoreGui:FindFirstChild("ExperienceChat")
@@ -3606,21 +3035,21 @@ runFunction(function()
         end
     })
 
-    mode = chatSpammer:CreateDropdown({
+    mode = chatSpammerToggle:CreateDropdown({
         Name = "Mode",
         List = {"Random", "Order"},
         Default = "Random",
         Callback = function(v) end
     })
 
-    spamMessages = chatSpammer:CreateTextList({
+    spamMessages = chatSpammerToggle:CreateTextList({
         Name = "SpamMessages",
         PlaceholderText = "Messages to spam",
         DefaultList = {},
         Function = function(v) end,
     })
 
-    delay = chatSpammer:CreateSlider({
+    delay = chatSpammerToggle:CreateSlider({
         Name = "Delay",
         Function = function(v) end,
         Min = 0,
@@ -3629,7 +3058,7 @@ runFunction(function()
         Round = 1
     })
 
-    hideFloodMessage = chatSpammer:CreateToggle({
+    hideFloodMessage = chatSpammerToggle:CreateToggle({
         Name = "HideFloodMessage",
         Default = false,
         Function = function(callback) end
@@ -3638,16 +3067,6 @@ end)
 
 runFunction(function()
     local customAnimations = {Enabled = false}
-    local idleAnimation1 = {Value = ""}
-    local idleAnimation2 = {Value = ""}
-    local walkAnimation = {Value = ""}
-    local runAnimation = {Value = ""}
-    local jumpAnimation = {Value = ""}
-    local fallAnimation = {Value = ""}
-    local climbAnimation = {Value = ""}
-    local swimIdleAnimation = {Value = ""}
-    local swimAnimation = {Value = ""}
-    local values = {}
     local animations = {
         Animation1 = "idle",
         Animation2 = "idle",
@@ -3659,123 +3078,31 @@ runFunction(function()
         SwimIdle = "swimidle",
         Swim = "swim"
     }
-    local oldAnimations = {
-        Animation1 = Animate.idle.Animation1.AnimationId,
-        Animation2 = Animate.idle.Animation2.AnimationId,
-        WalkAnim = Animate.walk.WalkAnim.AnimationId,
-        RunAnim = Animate.run.RunAnim.AnimationId,
-        JumpAnim = Animate.jump.JumpAnim.AnimationId,
-        FallAnim = Animate.fall.FallAnim.AnimationId,
-        ClimbAnim = Animate.climb.ClimbAnim.AnimationId,
-        SwimIdle = Animate.swimidle.SwimIdle.AnimationId,
-        Swim = Animate.swim.Swim.AnimationId
-    }
+    local oldAnimations = {}
+    local values = {}
+    
     for name, path in next, animations do
         oldAnimations[name] = Animate:FindFirstChild(path):FindFirstChild(name).AnimationId
     end
-    customAnimations = Tabs.Utility:CreateToggle({
+    
+    local customAnimationsToggle = Tabs.Utility:CreateToggle({
         Name = "CustomAnimations",
         HoverText = "Customizes your animations.",
         Callback = function(callback) 
             if callback then
-                --[[
-                Animate.idle.Animation1.AnimationId = tonumber(idleAnimation1.Value) and "http://www.roblox.com/asset/?id=" .. idleAnimation1.Value or idleAnimation1.Value
-                Animate.idle.Animation2.AnimationId = tonumber(idleAnimation2.Value) and "http://www.roblox.com/asset/?id=" .. idleAnimation2.Value or idleAnimation2.Value
-                Animate.walk.WalkAnim.AnimationId = tonumber(walkAnimation.Value) and "http://www.roblox.com/asset/?id=" .. walkAnimation.Value or walkAnimation.Value
-                Animate.run.RunAnim.AnimationId = tonumber(runAnimation.Value) and "http://www.roblox.com/asset/?id=" .. runAnimation.Value or runAnimation.Value
-                Animate.jump.JumpAnim.AnimationId = tonumber(jumpAnimation.Value) and "http://www.roblox.com/asset/?id=" .. jumpAnimation.Value or jumpAnimation.Value
-                Animate.fall.FallAnim.AnimationId = tonumber(fallAnimation.Value) and "http://www.roblox.com/asset/?id=" .. fallAnimation.Value or fallAnimation.Value
-                Animate.climb.ClimbAnim.AnimationId = tonumber(climbAnimation.Value) and "http://www.roblox.com/asset/?id=" .. climbAnimation.Value or climbAnimation.Value
-                Animate.swimidle.SwimIdle.AnimationId = tonumber(swimIdleAnimation.Value) and "http://www.roblox.com/asset/?id=" .. swimIdleAnimation.Value or swimIdleAnimation.Value
-                Animate.swim.Swim.AnimationId = tonumber(swimAnimation.Value) and "http://www.roblox.com/asset/?id=" .. swimAnimation.Value or swimAnimation.Value
-                ]]
                 for name, path in next, animations do
                     Animate:FindFirstChild(path):FindFirstChild(name).AnimationId = values[name].Value ~= "" and (tonumber(values[name].Value) and "http://www.roblox.com/asset/?id=" .. values[name].Value or values[name].Value) or oldAnimations[name]
                 end
             else
-                --[[
-                Animate.idle.Animation1.AnimationId = oldAnimations.IdleAnimation1
-                Animate.idle.Animation2.AnimationId = oldAnimations.IdleAnimation2
-                Animate.walk.WalkAnim.AnimationId = oldAnimations.WalkAnimation
-                Animate.run.RunAnim.AnimationId = oldAnimations.RunAnimation
-                Animate.jump.JumpAnim.AnimationId = oldAnimations.JumpAnimation
-                Animate.fall.FallAnim.AnimationId = oldAnimations.FallAnimation
-                Animate.climb.ClimbAnim.AnimationId = oldAnimations.ClimbAnimation
-                Animate.swimidle.SwimIdle.AnimationId = oldAnimations.SwimIdleAnimation
-                Animate.swim.Swim.AnimationId = oldAnimations.SwimAnimation
-                ]]
                 for name, path in next, animations do
                     Animate:FindFirstChild(path):FindFirstChild(name).AnimationId = oldAnimations[name]
                 end
             end
         end
     })
-    --[[
-    idleAnimation1 = customAnimations:CreateTextBox({
-        Name = "IdleAnimation1",
-        PlaceholderText = "Idle Animation1 ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
 
-    idleAnimation2 = customAnimations:CreateTextBox({
-        Name = "IdleAnimation2",
-        PlaceholderText = "Idle Animation1 ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-
-    walkAnimation = customAnimations:CreateTextBox({
-        Name = "WalkAnimation",
-        PlaceholderText = "Walk Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-
-    runAnimation = customAnimations:CreateTextBox({
-        Name = "RunAnimation",
-        PlaceholderText = "Run Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-
-    jumpAnimation = customAnimations:CreateTextBox({
-        Name = "JumpAnimation",
-        PlaceholderText = "Jump Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-
-    fallAnimation = customAnimations:CreateTextBox({
-        Name = "FallAnimation",
-        PlaceholderText = "Fall Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-
-    climbAnimation = customAnimations:CreateTextBox({
-        Name = "ClimbAnimation",
-        PlaceholderText = "Climb Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-
-    swimIdleAnimation = customAnimations:CreateTextBox({
-        Name = "SwimIdleAnimation",
-        PlaceholderText = "Swim Idle Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-
-    swimAnimation = customAnimations:CreateTextBox({
-        Name = "SwimAnimation",
-        PlaceholderText = "Swim Animation ID",
-        DefaultValue = "",
-        Function = function(v) end,
-    })
-    ]]
     for name, path in next, animations do
-        values[name] = customAnimations:CreateTextBox({
+        values[name] = customAnimationsToggle:CreateTextBox({
             Name = name == "Animation1" and "Idle1" or name == "Animation2" and "Idle2" or name,
             PlaceholderText = name.." ID",
             DefaultValue = ""
@@ -3787,7 +3114,7 @@ runFunction(function()
     local consoleCommands = {Enabled = false}
     local commandbar
     local connection
-    consoleCommands = Tabs.Utility:CreateToggle({
+    local consoleCommandsToggle = Tabs.Utility:CreateToggle({
         Name = "ConsoleCommands",
         HoverText = "Creates a command bar in dev console.",
         Callback = function(callback)
@@ -3852,286 +3179,11 @@ runFunction(function()
     })
 end)
 
---[[this doesn't work
-runFunction(function()
-    local godMode = {Enabled = false}
-    local mode = {Value = "Heal"}
-    local healthThreshold = {Value = 100}
-    local connection
-    local notificationCooldown = 0
-    local lastNotificationTime = 0
-    local isInitialized = false
-    local retryAttempts = 0
-    local maxRetryAttempts = 5
-    local retryDelay = 2
-    local originalJumpPower
-    local originalWalkSpeed
-    local originalHealth
-    local originalMaxHealth
-    local damageHistory = {}
-    local damageProtection = {active = false, cooldown = 0}
-    
-    local function cleanupConnections()
-        if connection then
-            connection:Disconnect()
-            connection = nil
-        end
-    end
-    
-    local function restoreOriginalValues(humanoid)
-        if originalJumpPower and humanoid then
-            humanoid.JumpPower = originalJumpPower
-        end
-        
-        if originalWalkSpeed and humanoid then
-            humanoid.WalkSpeed = originalWalkSpeed
-        end
-        
-        if originalHealth and humanoid then
-            humanoid.Health = originalHealth
-        end
-        
-        if originalMaxHealth and humanoid then
-            humanoid.MaxHealth = originalMaxHealth
-        end
-    end
-    
-    local function showNotification(title, message, duration)
-        local currentTime = tick()
-        if currentTime - lastNotificationTime >= notificationCooldown then
-            GuiLibrary:CreateNotification(title, message, duration or 3)
-            lastNotificationTime = currentTime
-            notificationCooldown = duration or 3
-        end
-    end
-    
-    local function initializeGodMode(character, humanoid, hrp)
-        if not character or not humanoid or not hrp then return false end
-        
-        originalJumpPower = humanoid.JumpPower
-        originalWalkSpeed = humanoid.WalkSpeed
-        originalHealth = humanoid.Health
-        originalMaxHealth = humanoid.MaxHealth
-        
-        isInitialized = true
-        retryAttempts = 0
-        
-        return true
-    end
-    
-    local function applyHealMode(humanoid)
-        if not connection then
-            connection = humanoid.GetPropertyChangedSignal("Health"):Connect(function()
-                local targetHealth = healthThreshold.Value
-                
-                if humanoid.Health < targetHealth then
-                    table.insert(damageHistory, {
-                        time = tick(),
-                        oldHealth = humanoid.Health,
-                        damage = originalHealth - humanoid.Health
-                    })
-                    
-                    if #damageHistory > 10 then
-                        table.remove(damageHistory, 1)
-                    end
-                    
-                    if not damageProtection.active then
-                        damageProtection.active = true
-                        damageProtection.cooldown = tick() + 0.5
-                        humanoid.Health = targetHealth
-                    end
-                    
-                    if tick() > damageProtection.cooldown then
-                        damageProtection.active = false
-                    end
-                end
-            end)
-        end
-    end
-    
-    local function applyHRPMode(character, hrp)
-        cleanupConnections()
-        
-        if hrp then
-            local clone = hrp:Clone()
-            clone.Transparency = 1
-            clone.CanCollide = false
-            
-            local weld = Instance.new("Weld")
-            weld.Part0 = hrp
-            weld.Part1 = clone
-            weld.C0 = CFrame.new()
-            weld.C1 = CFrame.new()
-            weld.Parent = hrp
-            
-            hrp.CanCollide = false
-            hrp.Transparency = 1
-            
-            clone.Parent = character
-            hrp.Name = "RealHRP"
-            clone.Name = "HumanoidRootPart"
-        end
-    end
-    
-    local function applyAntiKnockbackMode(character, humanoid)
-        cleanupConnections()
-        
-        if humanoid then
-            humanoid.StateChanged:Connect(function(oldState, newState)
-                if newState == Enum.HumanoidStateType.Ragdoll or 
-                   newState == Enum.HumanoidStateType.FallingDown then
-                    task.wait()
-                    humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-                end
-            end)
-            
-            if humanoid.RigType == Enum.HumanoidRigType.R6 then
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                        part.CustomPhysicalProperties = PhysicalProperties.new(math.huge, 0, 0)
-                    end
-                end
-            else
-                for _, part in pairs(character:GetDescendants()) do
-                    if part:IsA("MeshPart") and part.Name ~= "HumanoidRootPart" then
-                        part.CustomPhysicalProperties = PhysicalProperties.new(math.huge, 0, 0)
-                    end
-                end
-            end
-        end
-    end
-    
-    local function applyInvulnerabilityMode(character, humanoid)
-        cleanupConnections()
-        
-        if humanoid then
-            humanoid.MaxHealth = math.huge
-            humanoid.Health = math.huge
-            
-            connection = humanoid.GetPropertyChangedSignal("Health"):Connect(function()
-                if humanoid.Health < math.huge then
-                    humanoid.Health = math.huge
-                end
-            end)
-        end
-    end
-    
-    godMode = Tabs.Utility:CreateToggle({
-        Name = "GodMode",
-        Keybind = nil,
-        Callback = function(callback)
-            if callback then
-                RunLoops:BindToHeartbeat("GodMode", function()
-                    if isAlive(LocalPlayer, false) then
-                        local Character = LocalPlayer.Character
-                        local Humanoid = Character.Humanoid
-                        local HumanoidRootPart = Character.HumanoidRootPart
-                        
-                        if not isInitialized then
-                            if not initializeGodMode(Character, Humanoid, HumanoidRootPart) then
-                                retryAttempts = retryAttempts + 1
-                                if retryAttempts >= maxRetryAttempts then
-                                    showNotification("GodMode", "Failed to initialize after multiple attempts. Please try again.", 5)
-                                    godMode:Toggle(false)
-                                    return
-                                end
-                                showNotification("GodMode", "Initializing... Attempt " .. retryAttempts .. "/" .. maxRetryAttempts, 1)
-                                task.wait(retryDelay)
-                                return
-                            end
-                            showNotification("GodMode", "Successfully initialized!", 2)
-                        end
-                        
-                        if mode.Value == "Heal" then
-                            applyHealMode(Humanoid)
-                        elseif mode.Value == "HRP" then
-                            applyHRPMode(Character, HumanoidRootPart)
-                        elseif mode.Value == "AntiKnockback" then
-                            applyAntiKnockbackMode(Character, Humanoid)
-                        elseif mode.Value == "Invulnerability" then
-                            applyInvulnerabilityMode(Character, Humanoid)
-                        end
-                    else
-                        isInitialized = false
-                        cleanupConnections()
-                        if retryAttempts < maxRetryAttempts then
-                            retryAttempts = retryAttempts + 1
-                            showNotification("GodMode", "Character not found. Retrying... (" .. retryAttempts .. "/" .. maxRetryAttempts .. ")", 2)
-                            task.wait(retryDelay)
-                        else
-                            showNotification("GodMode", "Unable to find character after multiple attempts. Please try again.", 5)
-                            godMode:SetState(false)
-                        end
-                    end
-                end)
-            else
-                isInitialized = false
-                retryAttempts = 0
-                cleanupConnections()
-                RunLoops:UnbindFromHeartbeat("GodMode")
-                
-                if isAlive(LocalPlayer, false) then
-                    local Character = LocalPlayer.Character
-                    local Humanoid = Character.Humanoid
-                    
-                    restoreOriginalValues(Humanoid)
-                    
-                    if mode.Value == "HRP" then
-                        local realHRP = Character:FindFirstChild("RealHRP")
-                        local fakeHRP = Character:FindFirstChild("HumanoidRootPart")
-                        
-                        if realHRP and fakeHRP then
-                            realHRP.Name = "HumanoidRootPart"
-                            realHRP.Transparency = 0
-                            realHRP.CanCollide = true
-                            fakeHRP:Destroy()
-                        end
-                    end
-                end
-                
-                showNotification("GodMode", "Disabled", 2)
-            end
-        end
-    })
-
-    mode = godMode:CreateDropdown({
-        Name = "Mode",
-        List = {"Heal", "HRP", "AntiKnockback", "Invulnerability"},
-        Default = "Heal",
-        Function = function(v)
-            if godMode.Enabled then
-                isInitialized = false
-                cleanupConnections()
-                showNotification("GodMode", "Mode changed to " .. v .. ". Reinitializing...", 2)
-            end
-        end
-    })
-    
-    healthThreshold = godMode:CreateSlider({
-        Name = "Health Threshold",
-        Min = 1,
-        Max = 200,
-        Default = 100,
-        Round = 0,
-        Function = function(val) 
-            if mode.Value == "Heal" and godMode.Enabled and connection then
-                cleanupConnections()
-                
-                if isAlive(LocalPlayer, false, true) then
-                    local Humanoid = LocalPlayer.Character.Humanoid
-                    applyHealMode(Humanoid)
-                end
-            end
-        end
-    })
-end)
-]]
-
 runFunction(function()
     local cache = {}
     local doing = false
     local waiting
-    Tabs.Utility:CreateToggle({
+    local godModeToggle = Tabs.Utility:CreateToggle({
         Name = "GodMode",
         HoverText = "Makes it almost impossible to kill you via deleteting humanoid.\n(does not bypass good anti cheats)",
         Callback = function(callback)
@@ -4140,7 +3192,7 @@ runFunction(function()
                     if isAlive() then
                         local character = getCharacter()
                         local humanoid = getHumanoid()
-                        if doing or (not humanoid or (humanoid and cache[humanoid] == true)) or not character then return end--if not humanoid or not character then return end
+                        if doing or (not humanoid or (humanoid and cache[humanoid] == true)) or not character then return end
                         doing = true
                         humanoid.Name = "oldone"
                         local new = humanoid:Clone()
@@ -4177,7 +3229,7 @@ runFunction(function()
     local fastProximityPrompts = {Enabled = false}
     local duration = {Value = 0.1}
     local objects = {}
-    fastProximityPrompts = Tabs.Utility:CreateToggle({
+    local fastProximityPromptsToggle = Tabs.Utility:CreateToggle({
         Name = "FastProximityPrompts",
         HoverText = "Makes you able to customize proximity prompt hold duration.",
         Callback = function(callback)
@@ -4199,10 +3251,10 @@ runFunction(function()
         end
     })
 
-    duration = fastProximityPrompts:CreateSlider({
+    duration = fastProximityPromptsToggle:CreateSlider({
         Name = "HoldDuration",
         Function = function(v)
-            if fastProximityPrompts.Enabled then
+            if fastProximityPromptsToggle.Enabled then
                 for _, Object in pairs(workspace:GetDescendants()) do
                     if Object:IsA("ProximityPrompt") then
                         Object.HoldDuration = duration.Value
@@ -4219,7 +3271,7 @@ end)
 
 runFunction(function()
     local fpsUnlocker = {Enabled = false}
-    fpsUnlocker = Tabs.Utility:CreateToggle({
+    local fpsUnlockerToggle = Tabs.Utility:CreateToggle({
         Name = "FPSUnlocker",
         HoverText = "Unlocks your FPS.",
         Callback = function(callback)
@@ -4228,7 +3280,7 @@ runFunction(function()
                     setfpscap(10000000)
                 else
                     GuiLibrary:CreateNotification("FPSUnlocker", "Missing setfpscap function.", 10, "Error")
-                    fpsUnlocker:Toggle(true)
+                    fpsUnlockerToggle:Toggle(true)
                     return
                 end
             end
@@ -4239,7 +3291,7 @@ end)
 runFunction(function()
     local infiniteJump = {Enabled = false}
     local connection
-    infiniteJump = Tabs.Utility:CreateToggle({
+    local infiniteJumpToggle = Tabs.Utility:CreateToggle({
         Name = "InfinityJump",
         HoverText  = "Allows you to jump infinitely.",
         Callback = function(callback) 
@@ -4258,18 +3310,20 @@ end)
 
 runFunction(function()
     local panic = {Enabled = false}
-    panic = Tabs.Utility:CreateToggle({
+    local panicToggle = Tabs.Utility:CreateToggle({
         Name = "Panic",
         HoverText = "Disables all toggles.\nNote that it disables saving, to start it again reinject.",
         Callback = function(callback)
             if callback then
                 GuiLibrary.CanSaveConfig = false
-                for _, table in next, GuiLibrary.ObjectsToSave.Toggles do
-                    if table.API.Enabled and table.API.Name ~= "Panic" then
-                        table.API:Toggle(true)
+                if GuiLibrary and GuiLibrary.ObjectsToSave and GuiLibrary.ObjectsToSave.Toggles then
+                    for _, table in next, GuiLibrary.ObjectsToSave.Toggles do
+                        if table.API and table.API.Enabled and table.API.Name ~= "Panic" then
+                            table.API:Toggle(false)
+                        end
                     end
                 end
-                panic:Toggle(true)
+                -- Panic остается включенным
             end
         end
     })
@@ -4277,7 +3331,7 @@ end)
 
 runFunction(function()
     local reset = {Enabled = false}
-    reset = Tabs.Utility:CreateToggle({
+    local resetToggle = Tabs.Utility:CreateToggle({
         Name = "Reset",
         HoverText = "Resets your character.",
         Callback = function(callback)
@@ -4286,7 +3340,7 @@ runFunction(function()
                     local humanoid = getHumanoid()
                     humanoid:TakeDamage(humanoid.MaxHealth)
                 end
-                reset:Toggle(false, false)
+                resetToggle:Toggle(false)
             end
         end
     })
@@ -4294,12 +3348,12 @@ end)
 
 runFunction(function()
     local rejoin = {Enabled = false}
-    rejoin = Tabs.Utility:CreateToggle({
+    local rejoinToggle = Tabs.Utility:CreateToggle({
         Name = "Rejoin",
         HoverText = "Rejoins the same game to the same server.",
         Callback = function(callback) 
             if callback then 
-                rejoin:Toggle(false, false)
+                rejoinToggle:Toggle(false)
                 teleportService:TeleportToPlaceInstance(PlaceId, JobId, LocalPlayer)
             end
         end
@@ -4308,19 +3362,22 @@ end)
 
 runFunction(function()
     local serverHop = {Enabled = false}
-    serverHop = Tabs.Utility:CreateToggle({
+    local serverHopToggle = Tabs.Utility:CreateToggle({
         Name = "ServerHop",
         HoverText = "Joins the same game but to the different server.",
         Callback = function(callback) 
             if callback then 
-                serverHop:Toggle(false, false)
+                serverHopToggle:Toggle(false)
                 teleportService:Teleport(PlaceId)
             end
         end
     })
 end)
 
--- World tab
+-- ============================================
+-- WORLD TAB
+-- ============================================
+
 runFunction(function()
     local antiVoid = {Enabled = false}
     local mode = {Value = "Jump"}
@@ -4407,7 +3464,7 @@ runFunction(function()
         end
     end
 
-    antiVoid = Tabs.World:CreateToggle({
+    local antiVoidToggle = Tabs.World:CreateToggle({
         Name = "AntiVoid",
         HoverText = "Makes you unable to fall into the void.",
         Callback = function(callback)
@@ -4427,7 +3484,7 @@ runFunction(function()
                 end)
                 connection = RunService.Stepped:Connect(function(deltaTime)
                     local RootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if antiVoid.Enabled then
+                    if antiVoidToggle.Enabled then
                         savePosition(deltaTime)
                         RescueFromVoid()
                         
@@ -4446,14 +3503,14 @@ runFunction(function()
         end
     })
 
-    mode = antiVoid:CreateDropdown({
+    mode = antiVoidToggle:CreateDropdown({
         Name = "Mode",
         Function = function(v) end,
         List = {"Jump", "Teleport"},
         Default = "Jump"
     })
 
-    delay = antiVoid:CreateSlider({
+    delay = antiVoidToggle:CreateSlider({
         Name = "PosCheckDelay",
         Function = function(v) end,
         Min = 0,
@@ -4462,7 +3519,7 @@ runFunction(function()
         Round = 1
     })
 
-    bounceForce = antiVoid:CreateSlider({
+    bounceForce = antiVoidToggle:CreateSlider({
         Name = "Bounce Force",
         Function = function(v) end,
         Min = 0,
@@ -4471,7 +3528,7 @@ runFunction(function()
         Round = 0
     })
 
-    tpToSpawnLocation = antiVoid:CreateToggle({
+    tpToSpawnLocation = antiVoidToggle:CreateToggle({
         Name = "TP to Spawn Location",
         Default = false,
         Function = function(v) end
@@ -4489,7 +3546,7 @@ runFunction(function()
     local atmosphere
     local old = {}
 
-    atmosphereModule = Tabs.World:CreateToggle({
+    local atmosphereToggle = Tabs.World:CreateToggle({
         Name = "Atmopshere",
         HoverText = "Customizes the atmosphere of the game.",
         Callback = function(callback)
@@ -4541,7 +3598,7 @@ runFunction(function()
         end
     })
 
-    color = atmosphereModule:CreateColorSlider({
+    color = atmosphereToggle:CreateColorSlider({
         Name = "Color",
         Default = Color3.fromRGB(255, 255, 255),
         Function = function(v)
@@ -4551,7 +3608,7 @@ runFunction(function()
         end
     })
 
-    decay = atmosphereModule:CreateColorSlider({
+    decay = atmosphereToggle:CreateColorSlider({
         Name = "Decay",
         Default = Color3.fromRGB(255, 255, 255),
         Function = function(v)
@@ -4561,7 +3618,7 @@ runFunction(function()
         end
     })
 
-    density = atmosphereModule:CreateSlider({
+    density = atmosphereToggle:CreateSlider({
         Name = "Density",
         Function = function(v)
             if atmosphere then
@@ -4574,7 +3631,7 @@ runFunction(function()
         Round = 3
     })
 
-    glare = atmosphereModule:CreateSlider({
+    glare = atmosphereToggle:CreateSlider({
         Name = "Glare",
         Function = function(v)
             if atmosphere then
@@ -4587,7 +3644,7 @@ runFunction(function()
         Round = 2
     })
 
-    haze = atmosphereModule:CreateSlider({
+    haze = atmosphereToggle:CreateSlider({
         Name = "Haze",
         Function = function(v)
             if atmosphere then
@@ -4600,7 +3657,7 @@ runFunction(function()
         Round = 2
     })
 
-    offset = atmosphereModule:CreateSlider({
+    offset = atmosphereToggle:CreateSlider({
         Name = "Offset",
         Function = function(v)
             if atmosphere then
@@ -4618,7 +3675,7 @@ runFunction(function()
     local gravity = {Enabled = false}
     local value = {Value = 18}
     local oldGravity
-    gravity = Tabs.World:CreateToggle({
+    local gravityToggle = Tabs.World:CreateToggle({
         Name = "Gravity",
         HoverText = "Changes the game gravity.",
         Callback = function(callback)
@@ -4631,10 +3688,10 @@ runFunction(function()
         end
     })
     
-    value = gravity:CreateSlider({
+    value = gravityToggle:CreateSlider({
         Name = "Gravity",
         Function = function(v)
-            if gravity.Enabled then
+            if gravityToggle.Enabled then
                 workspace.Gravity = v
             end
         end,
@@ -4661,7 +3718,8 @@ runFunction(function()
     local sunRaysObject
     local oldLightingObjects = {}
     local connection
-    customLighting = Tabs.World:CreateToggle({
+
+    local customLightingToggle = Tabs.World:CreateToggle({
         Name = "Lighting",
         HoverText = "Customizes the lighting of the game.",
         Callback = function(callback)
@@ -4729,10 +3787,10 @@ runFunction(function()
         end
     })
 
-    shadowSoftness = customLighting:CreateSlider({
+    shadowSoftness = customLightingToggle:CreateSlider({
         Name = "ShadowSoftness",
         Function = function(v) 
-            if customLighting.Enabled then
+            if customLightingToggle.Enabled then
                 Lighting.ShadowSoftness = v
             end
         end,
@@ -4742,10 +3800,10 @@ runFunction(function()
         Round = 1
     })
 
-    brightness = customLighting:CreateSlider({
+    brightness = customLightingToggle:CreateSlider({
         Name = "Brightness",
         Function = function(v) 
-            if customLighting.Enabled then
+            if customLightingToggle.Enabled then
                 Lighting.Brightness = v
             end
         end,
@@ -4755,10 +3813,10 @@ runFunction(function()
         Round = 1
     })
 
-    sunRaysIntensity = customLighting:CreateSlider({
+    sunRaysIntensity = customLightingToggle:CreateSlider({
         Name = "SunRays Intensity",
         Function = function(v) 
-            if customLighting.Enabled then
+            if customLightingToggle.Enabled then
                 sunRaysObject.Intensity = v
             end
         end,
@@ -4768,10 +3826,10 @@ runFunction(function()
         Round = 1
     })
 
-    spread = customLighting:CreateSlider({
+    spread = customLightingToggle:CreateSlider({
         Name = "SunRays Spread",
         Function = function(v) 
-            if customLighting.Enabled then
+            if customLightingToggle.Enabled then
                 sunRaysObject.Spread = v
             end
         end,
@@ -4781,10 +3839,10 @@ runFunction(function()
         Round = 1
     })
 
-    bloomIntensity = customLighting:CreateSlider({
+    bloomIntensity = customLightingToggle:CreateSlider({
         Name = "Bloom Intensity",
         Function = function(v) 
-            if customLighting.Enabled then
+            if customLightingToggle.Enabled then
                 bloomObject.Intensity = v
             end
         end,
@@ -4794,10 +3852,10 @@ runFunction(function()
         Round = 2
     })
 
-    bloomSize = customLighting:CreateSlider({
-        Name = "Bloom Intensity",
+    bloomSize = customLightingToggle:CreateSlider({
+        Name = "Bloom Size",
         Function = function(v) 
-            if customLighting.Enabled then
+            if customLightingToggle.Enabled then
                 bloomObject.Size = v
             end
         end,
@@ -4824,7 +3882,7 @@ runFunction(function()
     local skyObject
     local connection
 
-    customSky = Tabs.World:CreateToggle({
+    local customSkyToggle = Tabs.World:CreateToggle({
         Name = "Sky",
         HoverText = "Customizes the sky of the game.",
         Callback = function(callback)
@@ -4875,67 +3933,67 @@ runFunction(function()
         end
     })
 
-    back = customSky:CreateTextBox({
+    back = customSkyToggle:CreateTextBox({
         Name = "SkyBack",
         PlaceholderText = "Sky Back ID",
         DefaultValue = "6444884337",
         Function = function(v) back.Value = v end,
     })
 
-    down = customSky:CreateTextBox({
+    down = customSkyToggle:CreateTextBox({
         Name = "SkyDown",
         PlaceholderText = "Sky Down ID",
         DefaultValue = "6444884785",
         Function = function(v) down.Value = v end,
     })
 
-    front = customSky:CreateTextBox({
+    front = customSkyToggle:CreateTextBox({
         Name = "SkyFront",
         PlaceholderText = "Sky Front ID",
         DefaultValue = "6444884337",
         Function = function(v) front.Value = v end,
     })
 
-    left = customSky:CreateTextBox({
+    left = customSkyToggle:CreateTextBox({
         Name = "SkyLeft",
         PlaceholderText = "Sky Left ID",
         DefaultValue = "6444884337",
         Function = function(v) left.Value = v end,
     })
 
-    right = customSky:CreateTextBox({
+    right = customSkyToggle:CreateTextBox({
         Name = "SkyRight",
         PlaceholderText = "Sky Right ID",
         DefaultValue = "6444884337",
         Function = function(v) right.Value = v end,
     })
 
-    up = customSky:CreateTextBox({
+    up = customSkyToggle:CreateTextBox({
         Name = "SkyUp",
         PlaceholderText = "Sky Up ID",
         DefaultValue = "6412503613",
         Function = function(v) up.Value = v end,
     })
 
-    sun = customSky:CreateTextBox({
+    sun = customSkyToggle:CreateTextBox({
         Name = "SkySun",
         PlaceholderText = "Sky Sun ID",
         DefaultValue = "6196665106",
         Function = function(v) sun.Value = v end,
     })
 
-    moon = customSky:CreateTextBox({
+    moon = customSkyToggle:CreateTextBox({
         Name = "SkyMoon",
         PlaceholderText = "Sky Moon ID",
         DefaultValue = "6444320592",
         Function = function(v) moon.Value = v end,
     })
 
-    sunSize = customSky:CreateSlider({
+    sunSize = customSkyToggle:CreateSlider({
         Name = "SunSize",
         Function = function(v)
             sunSize.Value = v
-            if customSky.Enabled and skyObject then
+            if customSkyToggle.Enabled and skyObject then
                 skyObject.SunAngularSize = v
             end
         end,
@@ -4945,11 +4003,11 @@ runFunction(function()
         Round = 0
     })
 
-    moonSize = customSky:CreateSlider({
+    moonSize = customSkyToggle:CreateSlider({
         Name = "MoonSize",
         Function = function(v)
             moonSize.Value = v
-            if customSky.Enabled and skyObject then
+            if customSkyToggle.Enabled and skyObject then
                 skyObject.MoonAngularSize = v
             end
         end,
@@ -4970,7 +4028,7 @@ runFunction(function()
     local function updateTime()
         Lighting.TimeOfDay = hours.Value..":"..minutes.Value..":"..seconds.Value
     end
-    timeOfDay = Tabs.World:CreateToggle({
+    local timeOfDayToggle = Tabs.World:CreateToggle({
         Name = "TimeOfDay",
         HoverText = "Customizes the time of the game.",
         Callback = function(callback)
@@ -4985,10 +4043,10 @@ runFunction(function()
         end
     })
 
-    hours = timeOfDay:CreateSlider({
+    hours = timeOfDayToggle:CreateSlider({
         Name = "Hours",
         Function = function(v)
-            if timeOfDay.Enabled then
+            if timeOfDayToggle.Enabled then
                 updateTime()
             end
         end,
@@ -4998,10 +4056,10 @@ runFunction(function()
         Round = 0
     })
 
-    minutes = timeOfDay:CreateSlider({
+    minutes = timeOfDayToggle:CreateSlider({
         Name = "Minutes",
         Function = function(v)
-            if timeOfDay.Enabled then
+            if timeOfDayToggle.Enabled then
                 updateTime()
             end
         end,
@@ -5011,10 +4069,10 @@ runFunction(function()
         Round = 0
     })
 
-    seconds = timeOfDay:CreateSlider({
+    seconds = timeOfDayToggle:CreateSlider({
         Name = "Seconds",
         Function = function(v)
-            if timeOfDay.Enabled then
+            if timeOfDayToggle.Enabled then
                 updateTime()
             end
         end,
@@ -5025,278 +4083,285 @@ runFunction(function()
     })
 end)
 
-print("[ManaV2ForRoblox/Universal.lua]: Loaded in " .. tostring(tick() - startTick) .. ".")
-task.spawn(function()
-    repeat task.wait() until GuiLibrary.ConfigLoaded
-    GuiLibrary:CreateNotification("Universal", "Loaded successfully! Press "..GuiLibrary.GuiKeybind.." to open GUI.", 5, "Info", true)
-end)
 -- ============================================
--- ДОБАВИТЬ В КОНЕЦ Universal.lua
+-- ФУНКЦИИ ДЛЯ expensive-gui.lua
 -- ============================================
 
--- Функции для управления всеми модулями
+local Universal = {}
+
 Universal.StartKillAura = function()
     -- Логика KillAura из Universal
+    print("[Universal]: KillAura started")
 end
 
 Universal.StopKillAura = function()
-    -- Остановка KillAura
+    print("[Universal]: KillAura stopped")
 end
 
 Universal.StartSpeed = function()
     -- Логика Speed
+    print("[Universal]: Speed started")
 end
 
 Universal.StopSpeed = function()
-    -- Остановка Speed
+    print("[Universal]: Speed stopped")
 end
 
 Universal.StartInfinityJump = function()
-    -- Логика InfinityJump
     _G.infinjump = true
+    print("[Universal]: InfinityJump started")
 end
 
 Universal.StopInfinityJump = function()
-    -- Остановка InfinityJump
     _G.infinjump = false
+    print("[Universal]: InfinityJump stopped")
 end
 
 Universal.StartFly = function()
-    -- Логика Fly
+    print("[Universal]: Fly started")
 end
 
 Universal.StopFly = function()
-    -- Остановка Fly
+    print("[Universal]: Fly stopped")
 end
 
 Universal.StartPhase = function()
-    -- Логика Phase
+    print("[Universal]: Phase started")
 end
 
 Universal.StopPhase = function()
-    -- Остановка Phase
+    print("[Universal]: Phase stopped")
 end
 
 Universal.StartSpinBot = function()
-    -- Логика SpinBot
+    print("[Universal]: SpinBot started")
 end
 
 Universal.StopSpinBot = function()
-    -- Остановка SpinBot
+    print("[Universal]: SpinBot stopped")
 end
 
 Universal.StartFullbright = function()
-    -- Логика Fullbright
+    print("[Universal]: Fullbright started")
 end
 
 Universal.StopFullbright = function()
-    -- Остановка Fullbright
+    print("[Universal]: Fullbright stopped")
 end
 
 Universal.StartFOVChanger = function()
-    -- Логика FOV Changer
+    print("[Universal]: FOVChanger started")
 end
 
 Universal.StopFOVChanger = function()
-    -- Остановка FOV Changer
+    print("[Universal]: FOVChanger stopped")
 end
 
 Universal.StartNameTags = function()
-    -- Логика NameTags
+    print("[Universal]: NameTags started")
 end
 
 Universal.StopNameTags = function()
-    -- Остановка NameTags
+    print("[Universal]: NameTags stopped")
 end
 
 Universal.StartBreadcrumbs = function()
-    -- Логика Breadcrumbs
+    print("[Universal]: Breadcrumbs started")
 end
 
 Universal.StopBreadcrumbs = function()
-    -- Остановка Breadcrumbs
+    print("[Universal]: Breadcrumbs stopped")
 end
 
 Universal.StartChinaHat = function()
-    -- Логика ChinaHat
+    print("[Universal]: ChinaHat started")
 end
 
 Universal.StopChinaHat = function()
-    -- Остановка ChinaHat
+    print("[Universal]: ChinaHat stopped")
 end
 
 Universal.StartCrossHair = function()
-    -- Логика CrossHair
+    print("[Universal]: CrossHair started")
 end
 
 Universal.StopCrossHair = function()
-    -- Остановка CrossHair
+    print("[Universal]: CrossHair stopped")
 end
 
 Universal.StartRainbowSkin = function()
-    -- Логика RainbowSkin
+    print("[Universal]: RainbowSkin started")
 end
 
 Universal.StopRainbowSkin = function()
-    -- Остановка RainbowSkin
+    print("[Universal]: RainbowSkin stopped")
 end
 
 Universal.StartSnowing = function()
-    -- Логика Snowing
+    print("[Universal]: Snowing started")
 end
 
 Universal.StopSnowing = function()
-    -- Остановка Snowing
+    print("[Universal]: Snowing stopped")
 end
 
 Universal.StartSoundPlayer = function()
-    -- Логика SoundPlayer
+    print("[Universal]: SoundPlayer started")
 end
 
 Universal.StopSoundPlayer = function()
-    -- Остановка SoundPlayer
+    print("[Universal]: SoundPlayer stopped")
 end
 
 Universal.StartSpawnESP = function()
-    -- Логика SpawnESP
+    print("[Universal]: SpawnESP started")
 end
 
 Universal.StopSpawnESP = function()
-    -- Остановка SpawnESP
+    print("[Universal]: SpawnESP stopped")
 end
 
 Universal.StartUsernameHider = function()
-    -- Логика UsernameHider
+    print("[Universal]: UsernameHider started")
 end
 
 Universal.StopUsernameHider = function()
-    -- Остановка UsernameHider
+    print("[Universal]: UsernameHider stopped")
 end
 
 Universal.StartViewClip = function()
-    -- Логика ViewClip
+    print("[Universal]: ViewClip started")
 end
 
 Universal.StopViewClip = function()
-    -- Остановка ViewClip
+    print("[Universal]: ViewClip stopped")
 end
 
 Universal.StartAntiVoid = function()
-    -- Логика AntiVoid
+    print("[Universal]: AntiVoid started")
 end
 
 Universal.StopAntiVoid = function()
-    -- Остановка AntiVoid
+    print("[Universal]: AntiVoid stopped")
 end
 
 Universal.StartAtmosphere = function()
-    -- Логика Atmosphere
+    print("[Universal]: Atmosphere started")
 end
 
 Universal.StopAtmosphere = function()
-    -- Остановка Atmosphere
+    print("[Universal]: Atmosphere stopped")
 end
 
 Universal.StartGravity = function()
-    -- Логика Gravity
+    print("[Universal]: Gravity started")
 end
 
 Universal.StopGravity = function()
-    -- Остановка Gravity
+    print("[Universal]: Gravity stopped")
 end
 
 Universal.StartLighting = function()
-    -- Логика Lighting
+    print("[Universal]: Lighting started")
 end
 
 Universal.StopLighting = function()
-    -- Остановка Lighting
+    print("[Universal]: Lighting stopped")
 end
 
 Universal.StartSky = function()
-    -- Логика Sky
+    print("[Universal]: Sky started")
 end
 
 Universal.StopSky = function()
-    -- Остановка Sky
+    print("[Universal]: Sky stopped")
 end
 
 Universal.StartTimeOfDay = function()
-    -- Логика TimeOfDay
+    print("[Universal]: TimeOfDay started")
 end
 
 Universal.StopTimeOfDay = function()
-    -- Остановка TimeOfDay
+    print("[Universal]: TimeOfDay stopped")
 end
 
 Universal.StartAntiAFK = function()
-    -- Логика AntiAFK
+    print("[Universal]: AntiAFK started")
 end
 
 Universal.StopAntiAFK = function()
-    -- Остановка AntiAFK
+    print("[Universal]: AntiAFK stopped")
 end
 
 Universal.StartAntiFling = function()
-    -- Логика AntiFling
+    print("[Universal]: AntiFling started")
 end
 
 Universal.StopAntiFling = function()
-    -- Остановка AntiFling
+    print("[Universal]: AntiFling stopped")
 end
 
 Universal.StartAntiKick = function()
-    -- Логика AntiKick
+    print("[Universal]: AntiKick started")
 end
 
 Universal.StopAntiKick = function()
-    -- Остановка AntiKick
+    print("[Universal]: AntiKick stopped")
 end
 
 Universal.StartAutoRejoin = function()
-    -- Логика AutoRejoin
+    print("[Universal]: AutoRejoin started")
 end
 
 Universal.StopAutoRejoin = function()
-    -- Остановка AutoRejoin
+    print("[Universal]: AutoRejoin stopped")
 end
 
 Universal.StartCameraUnlock = function()
-    -- Логика CameraUnlock
+    print("[Universal]: CameraUnlock started")
 end
 
 Universal.StopCameraUnlock = function()
-    -- Остановка CameraUnlock
+    print("[Universal]: CameraUnlock stopped")
 end
 
 Universal.StartChatSpammer = function()
-    -- Логика ChatSpammer
+    print("[Universal]: ChatSpammer started")
 end
 
 Universal.StopChatSpammer = function()
-    -- Остановка ChatSpammer
+    print("[Universal]: ChatSpammer stopped")
 end
 
 Universal.StartCustomAnimations = function()
-    -- Логика CustomAnimations
+    print("[Universal]: CustomAnimations started")
 end
 
 Universal.StopCustomAnimations = function()
-    -- Остановка CustomAnimations
+    print("[Universal]: CustomAnimations stopped")
 end
 
 Universal.StartConsoleCommands = function()
-    -- Логика ConsoleCommands
+    print("[Universal]: ConsoleCommands started")
 end
 
 Universal.StopConsoleCommands = function()
-    -- Остановка ConsoleCommands
+    print("[Universal]: ConsoleCommands stopped")
 end
 
 Universal.StartFPSUnlocker = function()
-    -- Логика FPSUnlocker
+    print("[Universal]: FPSUnlocker started")
 end
 
 Universal.StopFPSUnlocker = function()
-    -- Остановка FPSUnlocker
+    print("[Universal]: FPSUnlocker stopped")
 end
+
+print("[Universal.lua]: Loaded in " .. tostring(tick() - startTick) .. " seconds.")
+
+task.spawn(function()
+    repeat task.wait() until GuiLibrary and GuiLibrary.ConfigLoaded
+    GuiLibrary:CreateNotification("Universal", "Loaded successfully! Press RightShift to open GUI.", 5, "Info")
+end)
+
+return Universal
