@@ -19,7 +19,8 @@ local guipallet = {
     ToggleColor = Color3.fromRGB(0, 0, 0),
     ToggleColor2 = Color3.fromRGB(52, 235, 58),
     TextColor = Color3.fromRGB(255, 255, 255),
-    Font = Enum.Font.Arial
+    Font = Enum.Font.Arial,
+    PlaceholderColor = Color3.fromRGB(128, 128, 128)
 }
 guilibrary.GuiPallet = guipallet
 
@@ -29,6 +30,7 @@ guilibrary.GuiPallet = guipallet
 local ScreenGui = Instance.new("ScreenGui", CoreGui)
 ScreenGui.Name = "Expensive"
 ScreenGui.DisplayOrder = 999
+ScreenGui.Enabled = true
 
 local ClickGui = Instance.new("Frame", ScreenGui)
 ClickGui.Name = "ClickGui"
@@ -43,6 +45,12 @@ hoverTextGui.Name = "HoverTexts"
 
 guilibrary.ScreenGui = ScreenGui
 guilibrary.ClickGui = ClickGui
+guilibrary.ObjectsToSave = {
+    Tabs = {},
+    Toggles = {},
+    Options = {}
+}
+guilibrary.CanSaveConfig = true
 
 local connections = {}
 
@@ -53,7 +61,6 @@ local function betterDisconnect(connection)
 end
 
 function guilibrary:CreateNotification(title, text, duration, mode)
-    -- Простое уведомление
     local notif = Instance.new("Frame")
     notif.Size = UDim2.new(0, 250, 0, 60)
     notif.Position = UDim2.new(0.7, 0, 0.8, 0)
@@ -210,7 +217,24 @@ function guilibrary:CreateTab(argstable)
         local ToggleTable = {
             Name = name,
             Enabled = false,
-            Callback = callback
+            Callback = callback,
+            Toggle = function(self, bool)
+                bool = (bool == nil) and (not self.Enabled) or bool
+                if bool == self.Enabled then return end
+                self.Enabled = bool
+                
+                if bool then
+                    toggle.BackgroundColor3 = color
+                else
+                    toggle.BackgroundColor3 = guipallet.ToggleColor
+                end
+                
+                callback(bool)
+            end,
+            ReToggle = function(self)
+                self:Toggle(true)
+                self:Toggle(true)
+            end
         }
         
         local toggle = Instance.new("TextButton")
@@ -258,25 +282,7 @@ function guilibrary:CreateTab(argstable)
         UIListLayout.Padding = UDim.new(0, 8)
         
         ToggleTable.optionsFrame = optionframe
-        
-        function ToggleTable:Toggle(bool)
-            bool = bool or (not ToggleTable.Enabled)
-            if bool == ToggleTable.Enabled then return end
-            ToggleTable.Enabled = bool
-            
-            if bool then
-                toggle.BackgroundColor3 = color
-            else
-                toggle.BackgroundColor3 = guipallet.ToggleColor
-            end
-            
-            callback(bool)
-        end
-        
-        function ToggleTable:ReToggle()
-            ToggleTable:Toggle()
-            ToggleTable:Toggle()
-        end
+        ToggleTable.MainObject = toggle
         
         toggle.MouseButton1Click:Connect(function()
             ToggleTable:Toggle()
@@ -285,6 +291,9 @@ function guilibrary:CreateTab(argstable)
         optionsframebutton.MouseButton1Click:Connect(function()
             optionframe.Visible = not optionframe.Visible
         end)
+        
+        -- Сохраняем для Panic
+        table.insert(guilibrary.ObjectsToSave.Toggles, {API = ToggleTable})
         
         -- ============================================
         -- CREATE SLIDER
@@ -300,7 +309,14 @@ function guilibrary:CreateTab(argstable)
             local sliderapi = {
                 Name = name,
                 Value = value,
-                Callback = callback
+                Callback = callback,
+                Set = function(self, val)
+                    local SizeValue = math.floor((math.clamp(val, min, max) * (10 ^ round)) + 0.5) / (10 ^ round)
+                    self.Value = SizeValue
+                    slider_2.Size = UDim2.new((SizeValue - min) / (max - min), 0, 1, 0)
+                    slidertext.Text = name .. ": " .. SizeValue
+                    callback(SizeValue)
+                end
             }
             
             local slider = Instance.new("TextButton")
@@ -360,13 +376,8 @@ function guilibrary:CreateTab(argstable)
                 end
             end)
             
-            function sliderapi:Set(val)
-                local SizeValue = math.floor((math.clamp(val, min, max) * (10 ^ round)) + 0.5) / (10 ^ round)
-                sliderapi.Value = SizeValue
-                slider_2.Size = UDim2.new((SizeValue - min) / (max - min), 0, 1, 0)
-                slidertext.Text = name .. ": " .. SizeValue
-                callback(SizeValue)
-            end
+            sliderapi.MainObject = slider_2
+            sliderapi.Container = slider
             
             return sliderapi
         end
@@ -384,7 +395,12 @@ function guilibrary:CreateTab(argstable)
                 Name = name,
                 Value = value,
                 List = list,
-                Callback = callback
+                Callback = callback,
+                Select = function(self, option)
+                    self.Value = option
+                    dropdown.Text = name .. ": " .. option
+                    callback(option)
+                end
             }
             
             local dropdown = Instance.new("TextLabel")
@@ -427,12 +443,6 @@ function guilibrary:CreateTab(argstable)
             dropdownButton.TextColor3 = guipallet.TextColor
             dropdownButton.TextSize = 22
             
-            function dropdownapi:Select(option)
-                dropdownapi.Value = option
-                dropdown.Text = name .. ": " .. option
-                callback(option)
-            end
-            
             for _, opt in pairs(list) do
                 local btn = Instance.new("TextButton")
                 btn.Name = opt
@@ -463,6 +473,9 @@ function guilibrary:CreateTab(argstable)
                 end
             end)
             
+            dropdownapi.MainObject = dropdown
+            dropdownapi.Container = dropdownOptions
+            
             return dropdownapi
         end
         
@@ -477,7 +490,12 @@ function guilibrary:CreateTab(argstable)
             local colorsliderapi = {
                 Name = name,
                 Value = value,
-                Callback = callback
+                Callback = callback,
+                Set = function(self, color)
+                    currentColor.BackgroundColor3 = color
+                    self.Value = color
+                    callback(color)
+                end
             }
             
             local frame = Instance.new("Frame")
@@ -510,11 +528,8 @@ function guilibrary:CreateTab(argstable)
             nameLabel.TextXAlignment = Enum.TextXAlignment.Left
             nameLabel.Parent = frame
             
-            function colorsliderapi:Set(color)
-                currentColor.BackgroundColor3 = color
-                colorsliderapi.Value = color
-                callback(color)
-            end
+            colorsliderapi.MainObject = frame
+            colorsliderapi.Container = frame
             
             return colorsliderapi
         end
@@ -560,7 +575,12 @@ function guilibrary:CreateTab(argstable)
             local textboxapi = {
                 Name = name,
                 Value = value,
-                Callback = callback
+                Callback = callback,
+                Set = function(self, val)
+                    textbox.Text = val
+                    self.Value = val
+                    callback(val)
+                end
             }
             
             local frame = Instance.new("Frame")
@@ -584,17 +604,76 @@ function guilibrary:CreateTab(argstable)
             textbox.PlaceholderText = placeholder
             textbox.ClearTextOnFocus = false
             
-            function textboxapi:Set(val)
-                textbox.Text = val
-                textboxapi.Value = val
-                callback(val)
-            end
-            
             textbox.FocusLost:Connect(function()
                 textboxapi:Set(textbox.Text)
             end)
             
+            textboxapi.MainObject = textbox
+            textboxapi.Container = frame
+            
             return textboxapi
+        end
+        
+        -- ============================================
+        -- CREATE TEXT LIST
+        -- ============================================
+        function ToggleTable:CreateTextList(argstable)
+            local name = argstable.Name
+            local list = argstable.List or {}
+            local placeholder = argstable.PlaceholderText or ""
+            local callback = argstable.Callback or function() end
+            
+            local textlistapi = {
+                Name = name,
+                List = list,
+                Callback = callback,
+                Add = function(self, text)
+                    table.insert(self.List, text)
+                    callback(self.List)
+                    self:Update()
+                end,
+                Remove = function(self, index)
+                    table.remove(self.List, index)
+                    callback(self.List)
+                    self:Update()
+                end,
+                Update = function(self)
+                    -- Обновление UI
+                end
+            }
+            
+            local frame = Instance.new("Frame")
+            frame.Name = name
+            frame.Parent = optionframe
+            frame.BackgroundColor3 = color
+            frame.BorderSizePixel = 0
+            frame.Size = UDim2.new(0, 180, 0, 33)
+            
+            local textbox = Instance.new("TextBox")
+            textbox.Name = name .. "TextBox"
+            textbox.Parent = frame
+            textbox.BackgroundTransparency = 1
+            textbox.BorderSizePixel = 0
+            textbox.Size = UDim2.new(0, 180, 0, 33)
+            textbox.Font = guipallet.Font
+            textbox.Text = ""
+            textbox.TextColor3 = guipallet.TextColor
+            textbox.PlaceholderColor3 = guipallet.PlaceholderColor
+            textbox.TextSize = 22
+            textbox.PlaceholderText = placeholder
+            textbox.ClearTextOnFocus = false
+            
+            textbox.FocusLost:Connect(function()
+                if textbox.Text ~= "" then
+                    textlistapi:Add(textbox.Text)
+                    textbox.Text = ""
+                end
+            end)
+            
+            textlistapi.MainObject = textbox
+            textlistapi.Container = frame
+            
+            return textlistapi
         end
         
         return ToggleTable
@@ -614,7 +693,14 @@ function guilibrary:CreateTab(argstable)
         local sliderapi = {
             Name = name,
             Value = value,
-            Callback = callback
+            Callback = callback,
+            Set = function(self, val)
+                local SizeValue = math.floor((math.clamp(val, min, max) * (10 ^ round)) + 0.5) / (10 ^ round)
+                self.Value = SizeValue
+                slider_2.Size = UDim2.new((SizeValue - min) / (max - min), 0, 1, 0)
+                slidertext.Text = name .. ": " .. SizeValue
+                callback(SizeValue)
+            end
         }
         
         local slider = Instance.new("TextButton")
@@ -674,13 +760,8 @@ function guilibrary:CreateTab(argstable)
             end
         end)
         
-        function sliderapi:Set(val)
-            local SizeValue = math.floor((math.clamp(val, min, max) * (10 ^ round)) + 0.5) / (10 ^ round)
-            sliderapi.Value = SizeValue
-            slider_2.Size = UDim2.new((SizeValue - min) / (max - min), 0, 1, 0)
-            slidertext.Text = name .. ": " .. SizeValue
-            callback(SizeValue)
-        end
+        sliderapi.MainObject = slider_2
+        sliderapi.Container = slider
         
         return sliderapi
     end
@@ -698,7 +779,12 @@ function guilibrary:CreateTab(argstable)
             Name = name,
             Value = value,
             List = list,
-            Callback = callback
+            Callback = callback,
+            Select = function(self, option)
+                self.Value = option
+                dropdown.Text = name .. ": " .. option
+                callback(option)
+            end
         }
         
         local dropdown = Instance.new("TextLabel")
@@ -741,12 +827,6 @@ function guilibrary:CreateTab(argstable)
         dropdownButton.TextColor3 = guipallet.TextColor
         dropdownButton.TextSize = 22
         
-        function dropdownapi:Select(option)
-            dropdownapi.Value = option
-            dropdown.Text = name .. ": " .. option
-            callback(option)
-        end
-        
         for _, opt in pairs(list) do
             local btn = Instance.new("TextButton")
             btn.Name = opt
@@ -777,6 +857,9 @@ function guilibrary:CreateTab(argstable)
             end
         end)
         
+        dropdownapi.MainObject = dropdown
+        dropdownapi.Container = dropdownOptions
+        
         return dropdownapi
     end
     
@@ -791,7 +874,12 @@ function guilibrary:CreateTab(argstable)
         local colorsliderapi = {
             Name = name,
             Value = value,
-            Callback = callback
+            Callback = callback,
+            Set = function(self, color)
+                currentColor.BackgroundColor3 = color
+                self.Value = color
+                callback(color)
+            end
         }
         
         local frame = Instance.new("Frame")
@@ -824,11 +912,8 @@ function guilibrary:CreateTab(argstable)
         nameLabel.TextXAlignment = Enum.TextXAlignment.Left
         nameLabel.Parent = frame
         
-        function colorsliderapi:Set(color)
-            currentColor.BackgroundColor3 = color
-            colorsliderapi.Value = color
-            callback(color)
-        end
+        colorsliderapi.MainObject = frame
+        colorsliderapi.Container = frame
         
         return colorsliderapi
     end
@@ -874,7 +959,12 @@ function guilibrary:CreateTab(argstable)
         local textboxapi = {
             Name = name,
             Value = value,
-            Callback = callback
+            Callback = callback,
+            Set = function(self, val)
+                textbox.Text = val
+                self.Value = val
+                callback(val)
+            end
         }
         
         local frame = Instance.new("Frame")
@@ -898,17 +988,76 @@ function guilibrary:CreateTab(argstable)
         textbox.PlaceholderText = placeholder
         textbox.ClearTextOnFocus = false
         
-        function textboxapi:Set(val)
-            textbox.Text = val
-            textboxapi.Value = val
-            callback(val)
-        end
-        
         textbox.FocusLost:Connect(function()
             textboxapi:Set(textbox.Text)
         end)
         
+        textboxapi.MainObject = textbox
+        textboxapi.Container = frame
+        
         return textboxapi
+    end
+    
+    -- ============================================
+    -- CREATE TEXT LIST IN TAB
+    -- ============================================
+    function tabtable:CreateTextList(argstable)
+        local name = argstable.Name
+        local list = argstable.List or {}
+        local placeholder = argstable.PlaceholderText or ""
+        local callback = argstable.Callback or function() end
+        
+        local textlistapi = {
+            Name = name,
+            List = list,
+            Callback = callback,
+            Add = function(self, text)
+                table.insert(self.List, text)
+                callback(self.List)
+                self:Update()
+            end,
+            Remove = function(self, index)
+                table.remove(self.List, index)
+                callback(self.List)
+                self:Update()
+            end,
+            Update = function(self)
+                -- Обновление UI
+            end
+        }
+        
+        local frame = Instance.new("Frame")
+        frame.Name = name
+        frame.Parent = frame
+        frame.BackgroundColor3 = color
+        frame.BorderSizePixel = 0
+        frame.Size = UDim2.new(0, 180, 0, 33)
+        
+        local textbox = Instance.new("TextBox")
+        textbox.Name = name .. "TextBox"
+        textbox.Parent = frame
+        textbox.BackgroundTransparency = 1
+        textbox.BorderSizePixel = 0
+        textbox.Size = UDim2.new(0, 180, 0, 33)
+        textbox.Font = guipallet.Font
+        textbox.Text = ""
+        textbox.TextColor3 = guipallet.TextColor
+        textbox.PlaceholderColor3 = guipallet.PlaceholderColor
+        textbox.TextSize = 22
+        textbox.PlaceholderText = placeholder
+        textbox.ClearTextOnFocus = false
+        
+        textbox.FocusLost:Connect(function()
+            if textbox.Text ~= "" then
+                textlistapi:Add(textbox.Text)
+                textbox.Text = ""
+            end
+        end)
+        
+        textlistapi.MainObject = textbox
+        textlistapi.Container = frame
+        
+        return textlistapi
     end
     
     return tabtable
