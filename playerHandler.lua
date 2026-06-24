@@ -37,47 +37,47 @@ end
 
 function handler:getClosestPlayer(maxDisance, teamCheck)
     local MaximumDistance = maxDisance
-	local Target = nil
-	for _, v in next, players:GetPlayers() do
-		if v.Name ~= lplr.Name then
-			if teamCheck then
-				if v.Team ~= lplr.Team then
-					if v.Character ~= nil then
-						if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
-							if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
-								local ScreenPoint = camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
-								local VectorDistance = (Vector2.new(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
-								if VectorDistance < MaximumDistance then
-									Target = v
-								end
-							end
-						end
-					end
-				end
-			else
-				if v.Character ~= nil then
-					if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
-						if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
-							local ScreenPoint = camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
-							local VectorDistance = (Vector2.new(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
-							if VectorDistance < MaximumDistance then
-								Target = v
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-	return Target
+    local Target = nil
+    for _, v in next, players:GetPlayers() do
+        if v.Name ~= lplr.Name then
+            if teamCheck then
+                if v.Team ~= lplr.Team then
+                    if v.Character ~= nil then
+                        if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
+                            if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
+                                local ScreenPoint = camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
+                                local VectorDistance = (Vector2.new(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+                                if VectorDistance < MaximumDistance then
+                                    Target = v
+                                end
+                            end
+                        end
+                    end
+                end
+            else
+                if v.Character ~= nil then
+                    if v.Character:FindFirstChild("HumanoidRootPart") ~= nil then
+                        if v.Character:FindFirstChild("Humanoid") ~= nil and v.Character:FindFirstChild("Humanoid").Health ~= 0 then
+                            local ScreenPoint = camera:WorldToScreenPoint(v.Character:WaitForChild("HumanoidRootPart", math.huge).Position)
+                            local VectorDistance = (Vector2.new(userInputService:GetMouseLocation().X, userInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+                            if VectorDistance < MaximumDistance then
+                                Target = v
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return Target
 end
 
 function handler:getNearPlayers(distance)
     local nearPlayers = {}
     for _, plr in next, players:GetPlayers() do
         if plr ~= lplr and handler:isAlive(plr) then
-            local distance = (lplr.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
-            if distance <= distance then
+            local dist = (lplr.Character.HumanoidRootPart.Position - plr.Character.HumanoidRootPart.Position).Magnitude
+            if dist <= distance then
                 table.insert(nearPlayers, plr)
             end
         end
@@ -329,7 +329,6 @@ function handler:start()
     if handler.started then return end
     handler.started = true
     
-    -- Оборачиваем в task.spawn, чтобы не стопить Main.lua!
     task.spawn(function()
         repeat
             task.wait(0.5)
